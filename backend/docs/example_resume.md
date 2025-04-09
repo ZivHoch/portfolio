@@ -1,37 +1,56 @@
-ALON TRUGMAN - WORK EXPERIENCE
-### Wix.com - Backend Engineer *Sep 2023 - Sep 2024*
-Focused on Git DevEx infra that increases cadence and security across the company.
-* Refactored a suite of Scala services from scratch while maintaining backward compatibility, which eliminated human errors and increased security by creating new gRPC APIs, utilizing MySQL, monitoring with Grafana & Prometheus, and production debugging using Rookout.
-* Integrated with external services via webhooks, converted them to Kafka events, processed, stored, and handled data at scale, while using OAuth for authorization.
+ZIV HOCHMAN - WORK EXPERIENCE
 
-### Planckdata (Acquired by Applied Systems) - Backend Engineer *Dec 2021 - Sep 2023*
-We provided platform for insurance underwriters powered by public data, ML and LLMs.
-* Led a cost evaluation initiative that resulted in a 28% cost reduction by monitoring and analyzing external API calls using Java, RabbitMQ, Airflow DAGs, S3, and Postgres.
-* Designed and implemented a Data Quality project yielding a 20% boost in quality and improved end-user satisfaction by tracking data collection issues using Java, RabbitMQ & DynamoDB.
-* Developed a load test for the data collection system resulting in a 10% increase in speed by identifying bottlenecks and improving efficiency using Python and RESTful APIs.
-* Migrated Elasticsearch and Kibana cluster from Elastic to AWS OpenSearch.
-* Worked with our Kubernetes cluster, proficient in Docker and Terraform, and implemented CI/CD pipelines using GitLab for streamlined deployment processes.
+### Utrecht University - Data Science Researcher Sep 2024 – Present
 
-### Planckdata (Acquired by Applied Systems) - Solutions Data Analyst *Feb 2021 - Dec 2021*
-* Transformed customer usage data into actionable insights, wrote automation scripts using Python over Elasticsearch, Monday & Google Sheets and analyzed product performance.
-* Collaborated with Sales, CS, and Product teams for optimal sales cycle execution and often joined customer meetings. Prepared concise reports for clients and management.
+Focused on human-centered AI systems for climate adaptation with an emphasis on practical applications and societal impact.
 
-### Beilinson Hospital - Data Science Research Assistant *Jul 2020 - Jul 2021*
-* Selected as one of two students excelling in the Data Science course.
-* Established the Python infrastructure that analyzes ICU patient nutritional data using Jupyter Notebook, Pandas, Scikit-learn and Pycaret.
-* Focused on predicting mortality chances, I conducted extensive exploratory data analysis, data preprocessing, and executed ML models to predict and evaluate potential patient events.
+- Conducted research applying multi-objective algorithms to real-world environmental challenges.
+- Designed and developed an interactive web application using Python, JavaScript, D3.js, TypeScript, and SCSS.
+- Integrated advanced data visualization techniques to present complex data clearly and effectively for decision-making.
 
-### SafeHouse Technologies - Product Manager *Jul 2019 - Jul 2020*
-* Managed the implementation of Mixpanel analytics, enabling data-driven decision-making.
-* Collaborated with designers to work on the product's UI/UX using Figma & InVision.
-* Created a marketing plan utilizing Firebase and Google Ads.
-* Shaped the long-term vision and strategy for the company's product and features.
+### Utrecht University - Teaching Assistant Sep 2024 – Jan 2025
+
+Supported academic delivery in a master’s-level Data Science and AI course.
+
+- Provided lab support, held office hours, and answered student queries.
+- Graded assignments and exams, maintaining fairness and consistency.
+- Conducted tutorial sessions to reinforce understanding of complex topics.
+
+### ItsJson – Full Stack Developer Mar 2022 – Aug 2022
+
+Worked on a startup project enhancing front-end experience and API integration.
+
+- Developed and maintained modular ReactJS components.
+- Created scalable APIs using AWS Lambda via AWS Amplify.
+- Refactored and styled components using MUI, improving performance and UX.
+- Debugged memory issues and optimized child component management.
+- Proposed and implemented UI/UX improvements.
+
+### Lets Learn C in Hebrew – Founder & Developer Aug 2020 – Dec 2020
+
+Created a multilingual educational platform to teach the C programming language in Hebrew.
+
+- Developed the site from scratch using HTML, CSS, JavaScript, and jQuery.
+- Ensured responsive design for both desktop and mobile platforms.
+- [Link To The website](https://letslearnc.netlify.app/)
 
 ### EDUCATION
-* B.SC In Industrial Engineering & Management | Ariel University *Jul 2017 - Jul 2021*
-* Major in Data science | Graduated with Distinction (Magna Cum Laude)
+
+- B.Sc. in Computer Science (Cum Laude) | Holon Institute of Technology Oct 2019 – Mar 2022
+- M.Sc. in Data Science | Utrecht University Sep 2023 – Present
+
+### CERTIFICATES
+
+- Courses: Java Software Development and OOP – Sun Spark (2015–2016)
 
 ### ADDITIONAL INFORMATION
-* Army Duty: Shayetet 13, Combat Fighter on course release due to medical reasons
-* Volunteering: Mentor in Kravi-Tech & Genesis, guide people in finding a job in Hightech plus activist in israel 2050 movement
-* Activities: Participated in TAU debate club
+
+- Languages: Python, Java, JavaScript, TypeScript, SQL, C++
+- Technologies: React.js, Node.js, AWS, Spark, Hadoop, PyTorch, PowerBI, Git, Jupyter Notebook
+- Strengths: Teamwork, Fast Learner, Lateral Thinker
+
+### LANGUAGES
+
+- Hebrew - Native
+- English - Full Professional Proficiency
+- Dutch - Elementary Proficiency

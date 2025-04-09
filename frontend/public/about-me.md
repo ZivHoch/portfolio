@@ -1,8 +1,3 @@
-Hi, I'm Alon Trugman 👋 As a software developer with a passion for startups, I thrive when turning ideas into impactful products. 
-At Wix, I improved developer experience & securtiy through Git infrastructure solutions. 
-Previously at Planck (now Applied Systems), I built scalable data processing systems that transformed insurance industry data.
-My background in Industrial Engineering and Data Science brings an analytical perspective to engineering challenges. 
-I specialize in modern tech stacks and excel at simplifying complex problems.
-Outside work, I train for triathlons, practice Vipassana meditation, and mentor developers through Kravi-Tech & Genesis. 
+Hi, I'm Ziv Hochman 👋 I’m a highly motivated Master's student in Data Science and Artificial Intelligence at Utrecht University, with a strong foundation in computer science and hands-on experience as a full stack developer. My technical skill set spans Python, Java, ReactJS, TypeScript, Node.js, and AWS, and I’ve applied these technologies in both academic research and real-world projects. Currently, I’m conducting research on human-centered AI for climate adaptation, combining data science with impactful societal applications. I thrive in collaborative environments, value continuous learning, and enjoy translating complex data into meaningful insights. I'm now looking to bring my passion for innovation and problem-solving to dynamic projects where I can make a real contribution.
 
-Tech enthusiast • People Person • Sports Junkie • Meditator
+Tech enthusiast • People Person • Sports Junkie • Gamer

@@ -1,12 +1,12 @@
-import { motion } from 'framer-motion'
-import { Github } from 'lucide-react'
-import { useGithubRepos } from '../../../hooks/useGithubRepos'
+import { motion } from "framer-motion";
+import { Github } from "lucide-react";
+import { useGithubRepos } from "../../../hooks/useGithubRepos";
 
 export const ProjectsSection = () => {
-  const { repos, loading, error } = useGithubRepos('alonxt', 6)
+  const { repos, loading, error } = useGithubRepos("ZivHoch", 6);
 
-  if (loading) return <div>Loading...</div>
-  if (error) return <div>Error loading projects</div>
+  if (loading) return <div>Loading...</div>;
+  if (error) return <div>Error loading projects</div>;
 
   return (
     <motion.div
@@ -27,9 +27,7 @@ export const ProjectsSection = () => {
           <div className="absolute inset-0 bg-gradient-to-br from-purple-500/20 to-transparent rounded-lg transform group-hover:scale-105 transition-transform" />
           <div className="relative p-4 md:p-6 rounded-lg bg-white/5 border border-white/10 backdrop-blur-sm w-full flex flex-col">
             <h3 className="text-xl font-bold mb-2 truncate">{repo.name}</h3>
-            <p className="text-gray-400 mb-4 flex-grow line-clamp-3 sm:line-clamp-2">
-              {repo.description || 'No description available'}
-            </p>
+            <p className="text-gray-400 mb-4 flex-grow line-clamp-3 sm:line-clamp-2">{repo.description || "No description available"}</p>
             <div className="flex items-center gap-4">
               <a
                 href={repo.html_url}
@@ -45,5 +43,5 @@ export const ProjectsSection = () => {
         </motion.div>
       ))}
     </motion.div>
-  )
-} 
+  );
+};
