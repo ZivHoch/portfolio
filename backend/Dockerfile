@@ -35,4 +35,4 @@ COPY . .
 EXPOSE 8000
 
 # Command to run the application
-CMD ["python", "-m", "run_server"]
+CMD ["python", "-m", "server"]
