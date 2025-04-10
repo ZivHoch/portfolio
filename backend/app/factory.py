@@ -4,7 +4,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.logic.chat_service import ChatService
-from app.logic.document_indexer import DocumentIndexer
+# from app.logic.document_indexer import DocumentIndexer
 from google.generativeai import GenerativeModel
 
 # --- FastAPI App Factory ---
@@ -51,9 +51,9 @@ def chat_service() -> ChatService:
     )
 
 # --- Optional: Document Indexer Stub ---
-@lru_cache()
-def document_indexer() -> DocumentIndexer:
-    """Creates and caches document indexer instance"""
-    return DocumentIndexer(
-        embeddings=embeddings()
-    )
+# @lru_cache()
+# def document_indexer() -> DocumentIndexer:
+#     """Creates and caches document indexer instance"""
+#     return DocumentIndexer(
+#         embeddings=embeddings()
+#     )
