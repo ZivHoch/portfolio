@@ -5,7 +5,7 @@ from app.factory import chat_service
 from app.logic.chat_service import ChatService
 from app.logs.logger import get_logger
 from app.models.data_structures import ChatRequest
-
+from app.logic.gemini_service import stream_from_gemini
 logger = get_logger(__name__)
 
 # ✅ Create router instance
@@ -28,16 +28,8 @@ async def health_check():
 
 
 @router.post("/chat")
-async def chat(chat_request: ChatRequest):
-    """Chat endpoint that streams responses"""
-    try:
-        return StreamingResponse(
-            chat_handler.stream_chat(chat_request),
-            media_type="text/event-stream"
-        )
-    except Exception:
-        logger.exception("Unexpected error during chat")
-        raise HTTPException(
-            status_code=500,
-            detail="An internal server error occurred while processing your message."
-        )
+async def chat_endpoint(chat_request: ChatRequest):
+    return StreamingResponse(
+        stream_from_gemini(chat_request.message),
+        media_type="text/event-stream"
+    )
