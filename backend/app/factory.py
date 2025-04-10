@@ -1,7 +1,6 @@
 import os
 from functools import lru_cache
 from fastapi import FastAPI
-from fastapi.middleware.cors import CORSMiddleware
 
 from app.logic.chat_service import ChatService
 # from app.logic.document_indexer import DocumentIndexer
@@ -15,7 +14,6 @@ def create_app() -> FastAPI:
     # CORS configuration
     frontend_url = os.getenv("FRONTEND_URL", "http://localhost")
     app.add_middleware(
-        CORSMiddleware,
         allow_origins=["https://zivdev.netlify.app"],
         allow_credentials=True,
         allow_methods=["*"],
