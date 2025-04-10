@@ -1,196 +1,158 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { ChatService } from './chatService';
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
+import { ChatService } from "./chatService";
 
-describe('ChatService', () => {
-  // Mock fetch
+describe("ChatService", () => {
+  // Mock fetch globally
   global.fetch = vi.fn();
-  
+
   beforeEach(() => {
-    // Reset mocks before each test
     vi.clearAllMocks();
   });
-  
+
   afterEach(() => {
-    // Cleanup
     vi.restoreAllMocks();
   });
-  
-  describe('sendMessage', () => {
-    it('sends a message to the API with correct parameters', async () => {
-      // Mock successful response
+
+  describe("sendMessage", () => {
+    it("sends a message to the API with correct parameters", async () => {
       const mockResponse = new Response(JSON.stringify({ success: true }));
       global.fetch.mockResolvedValue(mockResponse);
-      
-      // Create a chat request with messages
+
       const chatRequest = {
-        sessionId: 'test-session-id',
+        sessionId: "test-session-id",
+        timestamp: Date.now() / 1000, // ✅ required field
         messages: [
-          { role: 'user', content: 'Test message' },
-          { role: 'assistant', content: 'Test response' }
-        ]
+          { role: "user", content: "Test message" },
+          { role: "assistant", content: "Test response" },
+        ],
       };
-      
-      // Call the method
+
       const result = await ChatService.sendMessage(chatRequest);
-      
-      // Check that fetch was called with correct parameters
-      expect(global.fetch).toHaveBeenCalledWith(expect.stringContaining('/chat'), {
-        method: 'POST',
+
+      expect(global.fetch).toHaveBeenCalledWith(expect.stringContaining("/chat"), {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          sessionId: 'test-session-id',
+          sessionId: "test-session-id",
+          timestamp: chatRequest.timestamp,
           messages: [
-            { role: 'user', content: 'Test message' },
-            { role: 'assistant', content: 'Test response' }
-          ]
-        })
+            { role: "user", content: "Test message" },
+            { role: "assistant", content: "Test response" },
+          ],
+        }),
       });
-      
-      // Check that the response was returned
+
       expect(result).toBe(mockResponse);
     });
-    
-    it('handles network errors', async () => {
-      // Mock network error
-      global.fetch.mockRejectedValue(new Error('Network error'));
-      
-      // Create a chat request with messages
+
+    it("handles network errors", async () => {
+      global.fetch.mockRejectedValue(new Error("Network error"));
+
       const chatRequest = {
-        sessionId: 'test-session-id',
-        messages: [
-          { role: 'user', content: 'Test message' }
-        ]
+        sessionId: "test-session-id",
+        timestamp: Date.now() / 1000,
+        messages: [{ role: "user", content: "Test message" }],
       };
-      
-      // Call the method and expect it to throw
-      await expect(ChatService.sendMessage(chatRequest)).rejects.toThrow('Network error');
+
+      await expect(ChatService.sendMessage(chatRequest)).rejects.toThrow("Network error");
     });
   });
-  
-  describe('handleStreamingResponse', () => {
-    it('processes a streaming response and calls callbacks', async () => {
-      // Mock ReadableStream
+
+  describe("handleStreamingResponse", () => {
+    it("processes a streaming response and calls callbacks", async () => {
       const mockReader = {
         read: vi.fn(),
-        cancel: vi.fn().mockResolvedValue(undefined)
+        cancel: vi.fn().mockResolvedValue(undefined),
       };
-      
-      // Setup the reader to return chunks and then done
+
       mockReader.read
-        .mockResolvedValueOnce({ 
-          value: new TextEncoder().encode('0:{"chunk":"Hello"}'), 
-          done: false 
+        .mockResolvedValueOnce({
+          value: new TextEncoder().encode('0:"Hello"'),
+          done: false,
         })
-        .mockResolvedValueOnce({ 
-          value: new TextEncoder().encode('0:{"chunk":" World"}'), 
-          done: false 
+        .mockResolvedValueOnce({
+          value: new TextEncoder().encode('0:" World"'),
+          done: false,
         })
         .mockResolvedValueOnce({ done: true });
-      
-      // Mock response with getReader
+
       const mockResponse = {
         body: {
-          getReader: () => mockReader
-        }
+          getReader: () => mockReader,
+        },
       };
-      
-      // Mock callbacks
+
       const callbacks = {
         onChunk: vi.fn(),
         onComplete: vi.fn(),
-        shouldStop: vi.fn().mockReturnValue(false)
+        shouldStop: vi.fn().mockReturnValue(false),
       };
-      
-      // Call the method
+
       await ChatService.handleStreamingResponse(mockResponse, callbacks);
-      
-      // Check that the reader was read until done
+
       expect(mockReader.read).toHaveBeenCalledTimes(3);
-      
-      // Check that onChunk was called for each chunk
       expect(callbacks.onChunk).toHaveBeenCalledTimes(2);
-      
-      // Check that onComplete was called once at the end
       expect(callbacks.onComplete).toHaveBeenCalledTimes(1);
     });
-    
-    it('handles errors during streaming', async () => {
-      // Mock ReadableStream with error
+
+    it("handles errors during streaming", async () => {
       const mockReader = {
-        read: vi.fn().mockRejectedValue(new Error('Stream error')),
-        cancel: vi.fn().mockResolvedValue(undefined)
+        read: vi.fn().mockRejectedValue(new Error("Stream error")),
+        cancel: vi.fn().mockResolvedValue(undefined),
       };
-      
-      // Mock response with getReader
+
       const mockResponse = {
         body: {
-          getReader: () => mockReader
-        }
+          getReader: () => mockReader,
+        },
       };
-      
-      // Mock callbacks
+
       const callbacks = {
         onChunk: vi.fn(),
         onComplete: vi.fn(),
-        shouldStop: vi.fn().mockReturnValue(false)
+        shouldStop: vi.fn().mockReturnValue(false),
       };
-      
-      // Call the method and expect it to throw
-      await expect(ChatService.handleStreamingResponse(mockResponse, callbacks))
-        .rejects.toThrow('Error processing response stream');
-      
-      // Check that onComplete was not called
+
+      await expect(ChatService.handleStreamingResponse(mockResponse, callbacks)).rejects.toThrow("Error processing response stream");
+
       expect(callbacks.onComplete).not.toHaveBeenCalled();
     });
   });
-  
-  describe('handleError', () => {
-    it('handles rate limit errors', async () => {
-      // Mock rate limit response
+
+  describe("handleError", () => {
+    it("handles rate limit errors", async () => {
       const mockResponse = new Response(
-        JSON.stringify({ 
+        JSON.stringify({
           friendly_message: "You've reached the rate limit. Please wait before sending more messages.",
-          retry_after: 10 
+          retry_after: 10,
         }),
         { status: 429 }
       );
-      
-      // Call the method
+
       const result = await ChatService.handleError(mockResponse);
-      
-      // Check the result
+
       expect(result).toEqual({
         isRateLimit: true,
         message: "You've reached the rate limit. Please wait before sending more messages.",
-        retryAfter: 10
+        retryAfter: 10,
       });
     });
-    
-    it('handles general errors', async () => {
-      // Mock general error response
-      const mockResponse = new Response(
-        JSON.stringify({ detail: 'Server error occurred' }),
-        { status: 500 }
-      );
-      
-      // Call the method and expect it to throw
-      await expect(ChatService.handleError(mockResponse)).rejects.toThrow('Server error occurred');
+
+    it("handles general errors", async () => {
+      const mockResponse = new Response(JSON.stringify({ detail: "Server error occurred" }), { status: 500 });
+
+      await expect(ChatService.handleError(mockResponse)).rejects.toThrow("Server error occurred");
     });
-    
-    it('handles non-JSON responses', async () => {
-      // Mock non-JSON response
-      const mockResponse = new Response(
-        'Internal Server Error',
-        { status: 500 }
-      );
-      
-      // Mock response.json to throw
-      mockResponse.json = vi.fn().mockRejectedValue(new SyntaxError('Unexpected token'));
-      
-      // Call the method and expect it to throw with the correct message
-      await expect(ChatService.handleError(mockResponse)).rejects.toThrow('Unexpected token');
+
+    it("handles non-JSON responses", async () => {
+      const mockResponse = new Response("Internal Server Error", { status: 500 });
+
+      // Simulate .json() throwing
+      mockResponse.json = vi.fn().mockRejectedValue(new SyntaxError("Unexpected token"));
+
+      await expect(ChatService.handleError(mockResponse)).rejects.toThrow("Unexpected token");
     });
   });
-}); 
+});

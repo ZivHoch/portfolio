@@ -4,7 +4,7 @@ export class ChatService {
   static async handleStreamingResponse(response, callbacks) {
     if (!response.body) {
       console.error("❌ No response body for stream.");
-      throw new Error("Stream not supported.");
+      throw new Error("Streaming not supported.");
     }
 
     const reader = response.body.getReader();
@@ -39,15 +39,15 @@ export class ChatService {
               callbacks.onChunk(fullMessage);
               await new Promise((resolve) => setTimeout(resolve, 30));
             } catch (e) {
-              console.error("❌ Error parsing JSON chunk:", e, line);
+              console.error("❌ Failed to parse JSON chunk:", e, line);
             }
           } else {
-            console.warn("⚠️ Unexpected line format:", line);
+            console.warn("⚠️ Unrecognized stream format:", line);
           }
         }
       }
     } catch (e) {
-      console.error("❌ Stream reading error:", e);
+      console.error("❌ Error while reading response stream:", e);
       throw new Error("Failed to process chat stream.");
     }
   }
@@ -58,33 +58,36 @@ export class ChatService {
       const text = await response.text();
       errorData = JSON.parse(text);
     } catch {
-      errorData = { detail: "Unexpected error (HTML or non-JSON response)" };
+      errorData = { detail: "Unexpected error (non-JSON response)" };
     }
 
     if (response.status === 429) {
       return {
         isRateLimit: true,
-        message: errorData.friendly_message || "You've hit the rate limit. Please wait before sending more messages.",
+        message: errorData.friendly_message || "You're sending messages too quickly. Please wait.",
         retryAfter: errorData.retry_after,
       };
     }
 
-    throw new Error(errorData.detail || "Failed to send message.");
+    throw new Error(errorData.detail || "Unknown error occurred.");
   }
 
   static async sendMessage(chatRequest) {
+    const payload = {
+      ...chatRequest,
+      timestamp: chatRequest.timestamp || Date.now() / 1000,
+      messages: (chatRequest.messages || []).map(({ role, content }) => ({
+        role,
+        content,
+      })),
+    };
+
     const response = await fetch(`${BACKEND_URL}/chat`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({
-        ...chatRequest,
-        messages: chatRequest.messages.map(({ role, content }) => ({
-          role,
-          content,
-        })),
-      }),
+      body: JSON.stringify(payload),
     });
 
     if (!response.ok) {
