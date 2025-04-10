@@ -1,11 +1,17 @@
+# fastapi
+# uvicorn[standard]
+# sqlmodel
+# python-dotenv
+# google-generativeai
+# pgvector
+# langchain
+# pydantic 
+# psycopg2-binary
+# numpy
+# slowapi
+
 fastapi
-uvicorn[standard]
-sqlmodel
+uvicorn
+httpx
 python-dotenv
 google-generativeai
-pgvector
-langchain
-pydantic 
-psycopg2-binary
-numpy
-slowapi
