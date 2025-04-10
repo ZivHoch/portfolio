@@ -7,13 +7,15 @@ from app.logs.logger import get_logger
 from app.startup.documents.init_documents import init_documents
 from dotenv import load_dotenv
 from fastapi import FastAPI
+from app.controllers.chat_router import router
+
 
 load_dotenv()
 logger = get_logger(__name__)
 
 # ✅ Create app at module level so uvicorn can find it
 app: FastAPI = factory.create_app()
-
+app.include_router(router)
 # ✅ Register routes
 chat_service = factory.chat_service()
 router = ChatRouter(chat_service=chat_service)
