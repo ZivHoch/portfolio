@@ -1,27 +1,28 @@
-const fetch = require("node-fetch");
+const { GoogleGenerativeAI } = require("@google/generative-ai");
+
+const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
 exports.handler = async function (event) {
-  const { messages } = JSON.parse(event.body);
+  try {
+    const { messages } = JSON.parse(event.body);
 
-  const response = await fetch("https://api.openai.com/v1/chat/completions", {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      model: "gpt-3.5-turbo",
-      messages: [
-        { role: "system", content: "You are a helpful assistant answering questions about Ziv Hochman." },
-        ...messages.filter((m) => m.role !== "system"),
-      ],
-    }),
-  });
+    const model = genAI.getGenerativeModel({ model: "gemini-pro" });
 
-  const data = await response.json();
+    const chatHistory = messages.map((msg) => `${msg.role.toUpperCase()}: ${msg.content}`).join("\n");
 
-  return {
-    statusCode: 200,
-    body: JSON.stringify({ reply: data.choices[0].message.content }),
-  };
+    const result = await model.generateContent(chatHistory);
+    const reply = result.response.text();
+
+    return {
+      statusCode: 200,
+      body: JSON.stringify({ reply }),
+    };
+  } catch (err) {
+    console.error("Error in Gemini function:", err);
+
+    return {
+      statusCode: 500,
+      body: JSON.stringify({ error: "Something went wrong." }),
+    };
+  }
 };
