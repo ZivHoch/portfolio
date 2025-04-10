@@ -2,6 +2,11 @@ const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "http://localhost:8000";
 
 export class ChatService {
   static async handleStreamingResponse(response, callbacks) {
+    if (!response.body) {
+      console.error("❌ No response body for stream.");
+      throw new Error("Stream not supported.");
+    }
+
     const reader = response.body.getReader();
     const decoder = new TextDecoder();
     let fullMessage = "";
@@ -15,13 +20,12 @@ export class ChatService {
         }
 
         const { done, value } = await reader.read();
-
         if (done) {
           callbacks.onComplete(fullMessage);
           break;
         }
 
-        const chunk = decoder.decode(value);
+        const chunk = decoder.decode(value, { stream: true });
         const lines = chunk.split("\n");
 
         for (const line of lines) {
@@ -35,27 +39,37 @@ export class ChatService {
               callbacks.onChunk(fullMessage);
               await new Promise((resolve) => setTimeout(resolve, 30));
             } catch (e) {
-              console.error("Error parsing streaming response:", e);
+              console.error("❌ Error parsing JSON chunk:", e, line);
             }
+          } else {
+            console.warn("⚠️ Unexpected line format:", line);
           }
         }
       }
     } catch (e) {
-      console.error("Error reading stream:", e);
-      throw new Error("Error processing response stream");
+      console.error("❌ Stream reading error:", e);
+      throw new Error("Failed to process chat stream.");
     }
   }
 
   static async handleError(response) {
-    const errorData = await response.json();
+    let errorData;
+    try {
+      const text = await response.text();
+      errorData = JSON.parse(text);
+    } catch {
+      errorData = { detail: "Unexpected error (HTML or non-JSON response)" };
+    }
+
     if (response.status === 429) {
       return {
         isRateLimit: true,
-        message: errorData.friendly_message || "You've reached the rate limit. Please wait before sending more messages.",
+        message: errorData.friendly_message || "You've hit the rate limit. Please wait before sending more messages.",
         retryAfter: errorData.retry_after,
       };
     }
-    throw new Error(errorData.detail || "Failed to send message");
+
+    throw new Error(errorData.detail || "Failed to send message.");
   }
 
   static async sendMessage(chatRequest) {
@@ -66,7 +80,10 @@ export class ChatService {
       },
       body: JSON.stringify({
         ...chatRequest,
-        messages: chatRequest.messages.map(({ role, content }) => ({ role, content })),
+        messages: chatRequest.messages.map(({ role, content }) => ({
+          role,
+          content,
+        })),
       }),
     });
 
