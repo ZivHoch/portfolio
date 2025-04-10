@@ -38,18 +38,3 @@ class RateLimitResponse(BaseModel):
                 "friendly_message": "You're sending messages too quickly! You can send another message in 30 seconds."
             }
         }
-class ChatLog(SQLModel, table=True):
-    id: Optional[int] = Field(default=None, primary_key=True)
-    session_id: str = Field(index=True)
-    user_message: str = Field(index=True)
-    assistant_message: str = Field(default="")
-    timestamp: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
-    created_at: datetime = Field(
-        default_factory=lambda: datetime.now(timezone.utc),
-        nullable=False
-    )
-
-    class Config:
-        json_encoders = {
-            datetime: lambda dt: dt.isoformat()
-        }
