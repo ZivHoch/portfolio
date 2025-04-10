@@ -61,3 +61,24 @@ class ChatService:
         messages.extend({"role": msg.role, "content": msg.content} for msg in recent_messages)
         messages.append({"role": "user", "content": chat_request.message})
         return messages
+
+async def stream_from_gemini(user_message: str):
+    headers = {"Content-Type": "application/json"}
+    url = f"{os.getenv('LLM_ROUTER_URL')}?key={os.getenv('LLM_ROUTER_API_KEY')}"
+
+    payload = {
+        "contents": [{
+            "parts": [{"text": user_message}]
+        }]
+    }
+
+    async with httpx.AsyncClient() as client:
+        response = await client.post(url, headers=headers, json=payload)
+
+        if response.status_code != 200:
+            yield f'0:{json.dumps("Gemini error: " + response.text)}\n'
+            return
+
+        result = response.json()
+        text = result.get("candidates", [{}])[0].get("content", {}).get("parts", [{}])[0].get("text", "")
+        yield f'0:{json.dumps(text)}\n'
