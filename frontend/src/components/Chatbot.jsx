@@ -1,5 +1,4 @@
-// 📁 src/components/Chatbot.jsx
-import React, { useState } from "react";
+import { useState } from "react";
 
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "http://localhost:8000";
 
@@ -48,14 +47,14 @@ const Chatbot = () => {
 
         const chunk = decoder.decode(value);
         const lines = chunk.split("\n");
+
         for (const line of lines) {
           if (line.startsWith("0:")) {
             try {
               const content = JSON.parse(line.slice(2));
               fullReply += content;
-              setMessages([...newMessages, { role: "assistant", content: fullReply }]);
             } catch (err) {
-              console.error("Failed to parse chunk:", err);
+              console.error("❌ Failed to parse stream chunk:", err, line);
             }
           }
         }
