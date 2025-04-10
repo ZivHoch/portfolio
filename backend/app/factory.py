@@ -45,9 +45,7 @@ def chat_service() -> ChatService:
     """Creates and caches the chat service instance"""
     return ChatService(
         llm_client=gemini_model(),
-        db_handler=None,  # You can plug this back in later
-        embeddings=embeddings(),
-        llm_model="gemini-pro"
+        llm_model="gemini-pro"  # or use os.getenv("LLM_MODEL")
     )
 
 # --- Optional: Document Indexer Stub ---
