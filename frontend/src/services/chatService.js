@@ -89,6 +89,7 @@ export class ChatService {
       },
       body: JSON.stringify(payload),
     });
+    console.log(response);
 
     if (!response.ok) {
       return this.handleError(response);

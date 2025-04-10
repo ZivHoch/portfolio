@@ -2,6 +2,7 @@ import os
 import json
 from typing import AsyncGenerator, List
 from fastapi import HTTPException
+import httpx
 
 from app.logs.logger import get_logger
 from app.models.data_structures import ChatRequest

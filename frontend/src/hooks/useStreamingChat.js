@@ -6,8 +6,10 @@ import { ChatService } from "../services/chatService";
 export const useStreamingChat = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
+
   const { sessionId, startNewSession } = useSession();
   const { messages, addMessage, updateLastMessage, resetMessages } = useMessages();
+
   const shouldStopRef = useRef(false);
 
   const stopAnswering = useCallback(() => {
@@ -24,8 +26,10 @@ export const useStreamingChat = () => {
     try {
       const filteredMessages = messages.filter((m) => m.role !== "system");
 
+      // Add user message to local chat state
       addMessage({ role: "user", content: message });
 
+      // Send message to backend
       const response = await ChatService.sendMessage({
         sessionId,
         message,
@@ -33,6 +37,7 @@ export const useStreamingChat = () => {
         timestamp: Date.now() / 1000,
       });
 
+      // Handle rate limiting
       if (response.isRateLimit) {
         addMessage({
           role: "assistant",
@@ -40,26 +45,26 @@ export const useStreamingChat = () => {
           isError: true,
           retryAfter: response.retryAfter,
         });
-        setIsLoading(false);
         return;
       }
 
       let hasStartedStreaming = false;
 
+      // Stream the response
       await ChatService.handleStreamingResponse(response, {
-        onChunk: (content) => {
+        onChunk: (chunk) => {
           if (!hasStartedStreaming) {
-            addMessage({ role: "assistant", content, isTyping: true });
+            addMessage({ role: "assistant", content: chunk, isTyping: true });
             hasStartedStreaming = true;
           } else {
-            updateLastMessage(content, true);
+            updateLastMessage(chunk, true);
           }
         },
-        onComplete: (content) => {
-          if (!hasStartedStreaming && content) {
-            addMessage({ role: "assistant", content, isTyping: false });
+        onComplete: (finalContent) => {
+          if (!hasStartedStreaming && finalContent) {
+            addMessage({ role: "assistant", content: finalContent, isTyping: false });
           } else if (hasStartedStreaming) {
-            updateLastMessage(content, false);
+            updateLastMessage(finalContent, false);
           } else {
             addMessage({
               role: "assistant",
@@ -72,6 +77,7 @@ export const useStreamingChat = () => {
         shouldStop: () => shouldStopRef.current,
       });
     } catch (err) {
+      console.error("❌ Streaming chat error:", err);
       setError(err.message || "An unexpected error occurred.");
       addMessage({
         role: "assistant",
