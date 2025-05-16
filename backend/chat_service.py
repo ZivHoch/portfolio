@@ -30,6 +30,7 @@ async def stream_from_gemini(chat_request):
         "2. Respond clearly using markdown.\n"
         "3. Do not make up information. Say if you're unsure.\n"
         "4. Be polite, but concise.\n"
+        "5. If the question concerns a specific role, research the company’s details and respond accordingly.\n"
     )
 
     # Format the message history
