@@ -26,13 +26,15 @@ Worked on a startup project enhancing front-end experience and API integration.
 - Debugged memory issues and optimized child component management.
 - Proposed and implemented UI/UX improvements.
 
+### Aditional Projects
+
 ### Lets Learn C in Hebrew – Founder & Developer Aug 2020 – Dec 2020
 
 Created a multilingual educational platform to teach the C programming language in Hebrew.
 
 - Developed the site from scratch using HTML, CSS, JavaScript, and jQuery.
 - Ensured responsive design for both desktop and mobile platforms.
-- [Link To The website](https://letslearnc.netlify.app/)
+- you can take a look in this link: https://letslearnc.netlify.app/
 
 ### EDUCATION
 
@@ -45,7 +47,7 @@ Created a multilingual educational platform to teach the C programming language 
 
 ### ADDITIONAL INFORMATION
 
-- Languages: Python, Java, JavaScript, TypeScript, SQL, C++
+- Languages: Python, Java, JavaScript, TypeScript, SQL, C++, C
 - Technologies: React.js, Node.js, AWS, Spark, Hadoop, PyTorch, PowerBI, Git, Jupyter Notebook
 - Strengths: Teamwork, Fast Learner, Lateral Thinker
 
