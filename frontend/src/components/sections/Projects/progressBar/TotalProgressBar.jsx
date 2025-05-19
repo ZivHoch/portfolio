@@ -3,16 +3,29 @@ import { useState, useEffect } from "react";
 import SegmentedProgressBar from "./SegmentedProgressBar";
 const GITHUB_API = import.meta.env.GitHub_TOKEN;
 
-const COLOR_PALETTE = [
-  "#ff4d7e", // pink
-  "#6c5ce7", // purple
-  "#00b894", // green
-  "#0984e3", // blue
-  "#fdcb6e", // yellow
-  "#e17055", // orange
-  "#d63031", // red
-];
-
+const languageColors = {
+  JavaScript: "#f1e05a",
+  Python: "#3572A5",
+  Java: "#b07219",
+  TypeScript: "#2b7489",
+  "C++": "#f34b7d",
+  "C#": "#178600",
+  PHP: "#4F5D95",
+  Ruby: "#701516",
+  Go: "#00ADD8",
+  Shell: "#89e051",
+  CSS: "#563d7c",
+  HTML: "#e34c26",
+  Swift: "#ffac45",
+  Kotlin: "#F18E33",
+  Rust: "#dea584",
+  Scala: "#c22d40",
+  Dart: "#00B4AB",
+  "Objective-C": "#438eff",
+  CoffeeScript: "#244776",
+  SQL: "#e38c00",
+  PowerShell: "#012456",
+};
 export default function TotalProgressBar({ url }) {
   const [langData, setLangData] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -34,11 +47,11 @@ export default function TotalProgressBar({ url }) {
         const entries = Object.entries(raw);
         const total = entries.reduce((sum, [, bytes]) => sum + bytes, 0);
 
-        const processed = entries.map(([lang, bytes], idx) => ({
+        const processed = entries.map(([lang, bytes]) => ({
           label: lang,
           bytes,
           percent: (bytes / total) * 100,
-          color: COLOR_PALETTE[idx % COLOR_PALETTE.length],
+          color: languageColors[lang],
         }));
 
         setLangData(processed);
