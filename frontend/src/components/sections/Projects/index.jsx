@@ -30,7 +30,7 @@ export const ProjectsSection = () => {
             <h3 className="text-xl font-bold mb-2 truncate">{repo.name}</h3>
             <p className="text-gray-400 mb-4 flex-grow line-clamp-3 sm:line-clamp-2">{repo.description || "No description available"}</p>
 
-            <TotalProgressBar url={repo.languages_url} />
+            {/* <TotalProgressBar url={repo.languages_url} /> */}
             <div className="flex items-center gap-4">
               <a
                 href={repo.html_url}
