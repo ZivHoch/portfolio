@@ -21,7 +21,11 @@ export default function TotalProgressBar({ url }) {
     setLoading(true);
     setError(null);
 
-    fetch(url)
+    fetch(url, {
+      headers: {
+        Accept: "application/vnd.github.v3+json", // if GitHub
+      },
+    })
       .then((res) => {
         if (!res.ok) {
           throw new Error(`Network response was not ok (${res.status})`);
