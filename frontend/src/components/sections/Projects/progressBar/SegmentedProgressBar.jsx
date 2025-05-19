@@ -1,4 +1,4 @@
-import React from "react";
+/* eslint-disable react/prop-types */
 import "./SegmentedProgressBar.css";
 
 export default function SegmentedProgressBar({ data }) {

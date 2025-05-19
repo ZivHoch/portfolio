@@ -1,5 +1,5 @@
-// App.jsx
-import React, { useState, useEffect } from "react";
+/* eslint-disable react/prop-types */
+import { useState, useEffect } from "react";
 import SegmentedProgressBar from "./SegmentedProgressBar";
 
 const COLOR_PALETTE = [
@@ -12,7 +12,7 @@ const COLOR_PALETTE = [
   "#d63031", // red
 ];
 
-function TotalProgressBar({ url }) {
+export default function TotalProgressBar({ url }) {
   const [langData, setLangData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -56,10 +56,8 @@ function TotalProgressBar({ url }) {
 
   return (
     <div style={{ padding: "2rem" }}>
-      <h2>Project Language Breakdown</h2>
+      <h2>Language Usage</h2>
       <SegmentedProgressBar data={langData} />
     </div>
   );
 }
-
-export default TotalProgressBar;

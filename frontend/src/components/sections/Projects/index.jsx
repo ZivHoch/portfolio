@@ -29,7 +29,6 @@ export const ProjectsSection = () => {
           <div className="relative p-4 md:p-6 rounded-lg bg-white/5 border border-white/10 backdrop-blur-sm w-full flex flex-col">
             <h3 className="text-xl font-bold mb-2 truncate">{repo.name}</h3>
             <p className="text-gray-400 mb-4 flex-grow line-clamp-3 sm:line-clamp-2">{repo.description || "No description available"}</p>
-            <p className="text-gray-400 mb-4 flex-grow line-clamp-3 sm:line-clamp-2">Language Usage</p>
             <TotalProgressBar url={repo.languages_url} />
             <div className="flex items-center gap-4">
               <a
