@@ -25,7 +25,7 @@ export default function TotalProgressBar({ url }) {
     fetch(url, {
       headers: {
         headers: {
-          Authorization: `Bearer ${GITHUB_API}`,
+          Authorization: `token  ${GITHUB_API}`,
           Accept: "application/vnd.github.v3+json",
         },
       },
@@ -63,7 +63,7 @@ export default function TotalProgressBar({ url }) {
   if (error) return <p style={{ color: "red" }}>{error}</p>;
 
   return (
-    <div style={{ padding: "2rem" }}>
+    <div>
       <h2>Language Usage</h2>
       <SegmentedProgressBar data={langData} />
     </div>

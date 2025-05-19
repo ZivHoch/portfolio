@@ -5,8 +5,8 @@ export const fetchUserRepos = async (username) => {
   try {
     const response = await fetch(`${GITHUB_API_BASE}/users/${username}/repos`, {
       headers: {
-        Authorization: `Bearer ${GITHUB_API}`,
         Accept: "application/vnd.github.v3+json",
+        Authorization: `token ${GITHUB_API}`,
       },
     });
     if (!response.ok) throw new Error("Failed to fetch repos");
