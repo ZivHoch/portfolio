@@ -4,7 +4,7 @@ import { useGithubRepos } from "../../../hooks/useGithubRepos";
 import TotalProgressBar from "./progressBar/TotalProgressBar";
 
 export const ProjectsSection = () => {
-  const { repos, loading, error } = useGithubRepos("ZivHoch", 10);
+  const { repos, loading, error } = useGithubRepos("ZivHoch", 15);
 
   if (loading) return <div>Loading...</div>;
   if (error) return <div>Error loading projects</div>;
