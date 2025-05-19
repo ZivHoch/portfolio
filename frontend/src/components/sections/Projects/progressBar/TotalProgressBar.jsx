@@ -12,16 +12,24 @@ const COLOR_PALETTE = [
   "#d63031", // red
 ];
 
-function App({ url }) {
+function TotalProgressBar({ url }) {
   const [langData, setLangData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    fetch
-      .get(url)
+    setLoading(true);
+    setError(null);
+
+    fetch(url)
       .then((res) => {
-        const raw = res.data; // { JavaScript: 153460, Python: 14861, … }
+        if (!res.ok) {
+          throw new Error(`Network response was not ok (${res.status})`);
+        }
+        return res.json();
+      })
+      .then((raw) => {
+        // raw is like: { JavaScript: 153460, Python: 14861, … }
         const entries = Object.entries(raw);
         const total = entries.reduce((sum, [, bytes]) => sum + bytes, 0);
 
@@ -41,7 +49,7 @@ function App({ url }) {
       .finally(() => {
         setLoading(false);
       });
-  }, []);
+  }, [url]);
 
   if (loading) return <p>Loading…</p>;
   if (error) return <p style={{ color: "red" }}>{error}</p>;
@@ -54,4 +62,4 @@ function App({ url }) {
   );
 }
 
-export default App;
+export default TotalProgressBar;
