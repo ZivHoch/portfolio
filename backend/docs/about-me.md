@@ -56,3 +56,10 @@ Created a multilingual educational platform to teach the C programming language 
 - Hebrew - Native
 - English - Full Professional Proficiency
 - Dutch - Elementary Proficiency
+
+### Likes
+
+- playing video games
+- going for a walk (hiking and trekking)
+- learning new things
+- sleep
