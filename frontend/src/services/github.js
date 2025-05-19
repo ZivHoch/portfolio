@@ -1,18 +1,29 @@
-const GITHUB_API_BASE = "https://api.github.com";
-const GITHUB_API = import.meta.env.GitHub_TOKEN;
+import { Octokit } from "octokit";
 
+// Vite only exposes env vars prefixed with VITE_
+const GITHUB_TOKEN = import.meta.env.GitHub_TOKEN;
+if (!GITHUB_TOKEN) {
+  throw new Error("Missing VITE_GITHUB_TOKEN in your .env");
+}
+
+const octokit = new Octokit({ auth: GITHUB_TOKEN });
+
+/**
+ * Fetch public repos for a given GitHub username.
+ * @param {string} username
+ * @returns {Promise<Array>} Array of repo objects
+ */
 export const fetchUserRepos = async (username) => {
   try {
-    const response = await fetch(`${GITHUB_API_BASE}/users/${username}/repos`, {
-      headers: {
-        Accept: "application/vnd.github.v3+json",
-        Authorization: `token ${GITHUB_API}`,
-      },
+    const { data } = await octokit.rest.repos.listForUser({
+      username,
+      per_page: 100, // adjust as needed
+      // you can add page: <n> here or use octokit.paginate for >100 repos
     });
-    if (!response.ok) throw new Error("Failed to fetch repos");
-    return await response.json();
+    return data;
   } catch (error) {
     console.error("Error fetching repos:", error);
-    throw error;
+    // Normalize to a friendly message
+    throw new Error(error.status === 404 ? `User "${username}" not found.` : "Failed to fetch GitHub repos.");
   }
 };
