@@ -1,6 +1,7 @@
 /* eslint-disable react/prop-types */
 import { useState, useEffect } from "react";
 import SegmentedProgressBar from "./SegmentedProgressBar";
+const GITHUB_API = import.meta.env.GitHub_TOKEN;
 
 const COLOR_PALETTE = [
   "#ff4d7e", // pink
@@ -23,7 +24,10 @@ export default function TotalProgressBar({ url }) {
 
     fetch(url, {
       headers: {
-        Accept: "application/vnd.github.v3+json", // if GitHub
+        headers: {
+          Authorization: `Bearer ${GITHUB_API}`,
+          Accept: "application/vnd.github.v3+json",
+        },
       },
     })
       .then((res) => {
