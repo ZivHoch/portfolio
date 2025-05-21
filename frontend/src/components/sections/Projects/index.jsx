@@ -31,10 +31,10 @@ export const ProjectsSection = () => {
             <h3 className="text-xl font-bold mb-2 truncate">{repo.name}</h3>
             <p className="text-gray-400 mb-4 flex-grow line-clamp-3 sm:line-clamp-2">{repo.description || "No description available"}</p>
 
-            <TotalProgressBar url={repo.languages_url} />
+            <TotalProgressBar url={repo.languages} />
             <div className="flex items-center gap-4">
               <a
-                href={repo.html_url}
+                href={repo.url}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="px-4 py-2 rounded-lg bg-purple-500 hover:bg-purple-600 transition-colors inline-flex items-center gap-2"
