@@ -1,7 +1,6 @@
 /* eslint-disable react/prop-types */
-import { useState, useEffect } from "react";
+import React from "react";
 import SegmentedProgressBar from "./SegmentedProgressBar";
-const GITHUB_API = import.meta.env.GitHub_TOKEN;
 
 const languageColors = {
   JavaScript: "#f1e05a",
@@ -26,51 +25,23 @@ const languageColors = {
   SQL: "#e38c00",
   PowerShell: "#012456",
 };
-export default function TotalProgressBar({ url }) {
-  const [langData, setLangData] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
 
-  useEffect(() => {
-    setLoading(true);
-    setError(null);
+export default function TotalProgressBar({ languages }) {
+  // Compute total bytes
+  const totalBytes = Object.values(languages).reduce((sum, v) => sum + v, 0);
 
-    fetch(url)
-      .then((res) => {
-        if (!res.ok) {
-          throw new Error(`Network response was not ok (${res.status})`);
-        }
-        return res.json();
-      })
-      .then((raw) => {
-        // raw is like: { JavaScript: 153460, Python: 14861, … }
-        const entries = Object.entries(raw);
-        const total = entries.reduce((sum, [, bytes]) => sum + bytes, 0);
-
-        const processed = entries.map(([lang, bytes]) => ({
-          label: lang,
-          bytes,
-          percent: (bytes / total) * 100,
-          color: languageColors[lang],
-        }));
-
-        setLangData(processed);
-      })
-      .catch((err) => {
-        console.error(err);
-        setError("Failed to load language data.");
-      })
-      .finally(() => {
-        setLoading(false);
-      });
-  }, [url]);
-
-  if (loading) return <p>Loading…</p>;
-  if (error) return <p style={{ color: "red" }}>{error}</p>;
+  // Build the data array for SegmentedProgressBar
+  const langData = Object.entries(languages)
+    .sort(([, a], [, b]) => b - a)
+    .map(([lang, bytes]) => ({
+      label: lang,
+      value: totalBytes > 0 ? Math.round((bytes / totalBytes) * 100) : 0,
+      color: languageColors[lang] || "#ccc",
+    }));
 
   return (
     <div>
-      <h2>Language Usage</h2>
+      <h2 className="text-lg font-semibold mb-2">Language Usage</h2>
       <SegmentedProgressBar data={langData} />
     </div>
   );

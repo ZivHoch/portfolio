@@ -10,7 +10,7 @@ export default function SegmentedProgressBar({ data }) {
             key={i}
             className="spb-segment"
             style={{
-              width: `${item.percent}%`,
+              width: `${item.value}%`,
               background: item.color,
             }}
           />
@@ -20,7 +20,7 @@ export default function SegmentedProgressBar({ data }) {
         {data.map((item, i) => (
           <div key={i} className="spb-legend-item">
             <span className="spb-legend-color" style={{ background: item.color }} />
-            {item.label} {item.percent.toFixed(1)}%
+            {item.label} {item.value.toFixed(1)}%
           </div>
         ))}
       </div>
