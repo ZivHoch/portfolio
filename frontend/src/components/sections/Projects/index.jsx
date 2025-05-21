@@ -2,10 +2,11 @@ import { motion } from "framer-motion";
 import { Github } from "lucide-react";
 import { useGithubRepos } from "../../../hooks/useGithubRepos";
 import TotalProgressBar from "./progressBar/TotalProgressBar";
+import {useProjects} from "../../../hooks/useProjects";
 
 export const ProjectsSection = () => {
-  const { repos, loading, error } = useGithubRepos("ZivHoch", 15);
-
+  // const { repos, loading, error } = useGithubRepos("ZivHoch", 15);
+  const { repos, loading, error } = useProjects(10);
   if (loading) return <div>Loading...</div>;
   if (error) return <div>Error loading projects</div>;
 
