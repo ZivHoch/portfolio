@@ -1,7 +1,7 @@
-import os;
 import { useState, useEffect } from "react";
 
-VITE_BACKEND_URL = os.getenv("VITE_BACKEND_URL")
+const backendUrl = import.meta.env.VITE_BACKEND_URL as string;
+
 export interface Repo {
   id:        number;
   name:      string;
@@ -17,7 +17,7 @@ export function useProjects(limit = 15) {
   const [error, setError]     = useState<Error | null>(null);
 
   useEffect(() => {
-    fetch(`${VITE_BACKEND_URL}/api/projects`)
+    fetch(`${backendUrl}/api/projects`)
       .then((res) => {
         if (!res.ok) throw new Error(`GitHub API error: ${res.status}`);
         return res.json();
