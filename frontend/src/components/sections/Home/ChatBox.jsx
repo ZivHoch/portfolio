@@ -1,25 +1,27 @@
-import { useState, useRef, useEffect } from 'react';
-import { useStreamingChat } from '../../../hooks/useStreamingChat';
-import { Bot, Sparkles } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { ChatMessage } from './ChatMessage';
-import { ChatInput } from './ChatInput';
-import { TypingIndicator } from './TypingIndicator';
-import { getPersonalInfo } from '../../../config/configLoader';
+import { useState, useRef, useEffect } from "react";
+import { useStreamingChat } from "../../../hooks/useStreamingChat";
+import { Bot, Sparkles } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import { ChatMessage } from "./ChatMessage";
+import { ChatInput } from "./ChatInput";
+import { TypingIndicator } from "./TypingIndicator";
+import { useConfig } from "../../../config/ConfigProvider";
 
 export const ChatBox = () => {
-  const [input, setInput] = useState('');
+  const { config } = useConfig();
+
+  const [input, setInput] = useState("");
   const [userEngaged, setUserEngaged] = useState(false);
-  const { messages, isLoading, error, sendMessage, stopAnswering } = useStreamingChat();
+  const { messages, isLoading, error, sendMessage, stopAnswering } =
+    useStreamingChat();
   const messagesEndRef = useRef(null);
-  const chatContainerRef = useRef(null);
   const lastMessageCountRef = useRef(messages.length);
-  
-  const personalInfo = getPersonalInfo();
-  const firstName = personalInfo?.name.split(' ')[0] || 'AI';
+
+  const fullName = (config?.personal?.name || "").trim();
+  const firstName = fullName ? fullName.split(" ")[0] : "AI";
 
   const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
 
   useEffect(() => {
@@ -35,15 +37,7 @@ export const ChatBox = () => {
 
   const handleSubmit = async (message) => {
     setUserEngaged(true);
-    
-    const chatRequest = {
-      message,
-      messages: messages.filter(msg => !msg.isTyping),
-      session_id: localStorage.getItem('chatSessionId') || 'default-session',
-      timestamp: Date.now() / 1000
-    };
-
-    await sendMessage(chatRequest);
+    await sendMessage(message);
   };
 
   return (
@@ -54,7 +48,7 @@ export const ChatBox = () => {
         className="bg-gray-900 rounded-2xl p-4 min-h-[400px] flex flex-col border border-purple-500/20 shadow-lg relative"
       >
         {/* Chat Header */}
-        <motion.div 
+        <motion.div
           className="relative flex items-center justify-between p-2 sm:p-4 mb-4 overflow-hidden rounded-xl"
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -71,7 +65,7 @@ export const ChatBox = () => {
             transition={{
               duration: 4,
               repeat: Infinity,
-              ease: "easeInOut"
+              ease: "easeInOut",
             }}
           />
 
@@ -91,7 +85,7 @@ export const ChatBox = () => {
 
             {/* Title with sparkle */}
             <div className="flex items-center gap-1 sm:gap-2">
-              <motion.h2 
+              <motion.h2
                 className="text-sm sm:text-xl font-bold bg-gradient-to-r from-white via-purple-200 to-pink-200 bg-clip-text text-transparent"
                 initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}
@@ -107,7 +101,7 @@ export const ChatBox = () => {
                 transition={{
                   duration: 2,
                   repeat: Infinity,
-                  ease: "easeInOut"
+                  ease: "easeInOut",
                 }}
                 className="flex-shrink-0"
               >
@@ -131,23 +125,22 @@ export const ChatBox = () => {
               transition={{
                 duration: 2,
                 repeat: Infinity,
-                ease: "easeInOut"
+                ease: "easeInOut",
               }}
             />
-            <span className="text-[10px] sm:text-xs text-gray-400 whitespace-nowrap">Online</span>
+            <span className="text-[10px] sm:text-xs text-gray-400 whitespace-nowrap">
+              Online
+            </span>
           </motion.div>
         </motion.div>
 
         {/* Messages container */}
-        <div
-          ref={chatContainerRef}
-          className="flex-1 overflow-y-auto space-y-4 mb-4 max-h-[300px] scroll-smooth scrollbar-thin scrollbar-thumb-purple-500/50 scrollbar-track-gray-800/50 pr-4"
-        >
+        <div className="flex-1 overflow-y-auto space-y-4 mb-4 max-h-[300px] scroll-smooth scrollbar-thin scrollbar-thumb-purple-500/50 scrollbar-track-gray-800/50 pr-4">
           <AnimatePresence>
             {messages.map((message, index) => (
               <ChatMessage key={index} message={message} />
             ))}
-            {isLoading && !messages.some(msg => msg.isTyping) && (
+            {isLoading && !messages.some((msg) => msg.isTyping) && (
               <TypingIndicator key="loading-indicator" />
             )}
           </AnimatePresence>
@@ -181,4 +174,4 @@ export const ChatBox = () => {
       </motion.div>
     </div>
   );
-}; 
+};

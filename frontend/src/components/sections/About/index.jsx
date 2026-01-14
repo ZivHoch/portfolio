@@ -1,40 +1,41 @@
-import { motion, AnimatePresence } from 'framer-motion'
-import { FastForward } from 'lucide-react'
-import { useState, useEffect } from 'react'
-import { useTypingEffect } from '../../../hooks/useTypingEffect'
+import { motion, AnimatePresence } from "framer-motion";
+import { FastForward } from "lucide-react";
+import { useState, useEffect } from "react";
+import { useTypingEffect } from "../../../hooks/useTypingEffect";
 
 export const AboutSection = () => {
-  const [aboutContent, setAboutContent] = useState('')
-  const { displayedContent, setIsTyping, setDisplayedContent } = useTypingEffect(aboutContent)
-  const [showSkipButton, setShowSkipButton] = useState(false)
+  const [aboutContent, setAboutContent] = useState("");
+  const { displayedContent, setIsTyping, setDisplayedContent } =
+    useTypingEffect(aboutContent);
+  const [showSkipButton, setShowSkipButton] = useState(false);
 
   useEffect(() => {
     const fetchAboutMe = async () => {
       try {
-        const response = await fetch('/about-me.md')
-        const text = await response.text()
-        setAboutContent(text)
+        const response = await fetch("/knowledge/about-me.md");
+        const text = await response.text();
+        setAboutContent(text);
       } catch (error) {
-        console.error('Error reading about-me.md:', error)
-        setAboutContent('Error loading content...')
+        console.error("Error reading about-me.md:", error);
+        setAboutContent("Error loading content...");
       }
-    }
-    fetchAboutMe()
-  }, [])
+    };
+    fetchAboutMe();
+  }, []);
 
   useEffect(() => {
     const timer = setTimeout(() => {
-      setShowSkipButton(true)
-    }, 2000)
+      setShowSkipButton(true);
+    }, 2000);
 
-    return () => clearTimeout(timer)
-  }, [])
+    return () => clearTimeout(timer);
+  }, []);
 
   const handleSkip = () => {
-    setIsTyping(false)
-    setDisplayedContent(aboutContent)
-    setShowSkipButton(false)
-  }
+    setIsTyping(false);
+    setDisplayedContent(aboutContent);
+    setShowSkipButton(false);
+  };
 
   return (
     <motion.div
@@ -80,5 +81,5 @@ export const AboutSection = () => {
         )}
       </AnimatePresence>
     </motion.div>
-  )
-} 
+  );
+};

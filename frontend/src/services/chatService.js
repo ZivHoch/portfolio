@@ -37,7 +37,6 @@ export class ChatService {
               const content = JSON.parse(match[1]);
               fullMessage += content;
               callbacks.onChunk(fullMessage);
-              await new Promise((resolve) => setTimeout(resolve, 30));
             } catch (e) {
               console.error("❌ Failed to parse JSON chunk:", e, line);
             }
@@ -64,7 +63,9 @@ export class ChatService {
     if (response.status === 429) {
       return {
         isRateLimit: true,
-        message: errorData.friendly_message || "You're sending messages too quickly. Please wait.",
+        message:
+          errorData.friendly_message ||
+          "You're sending messages too quickly. Please wait.",
         retryAfter: errorData.retry_after,
       };
     }
@@ -73,9 +74,16 @@ export class ChatService {
   }
 
   static async sendMessage(chatRequest) {
+    const message = (chatRequest?.message || "").trim();
+    if (!message) {
+      throw new Error("Missing chat message");
+    }
+
+    const sessionId = chatRequest.session_id || chatRequest.sessionId;
+
     const payload = {
-      ...chatRequest,
-      timestamp: chatRequest.timestamp || Date.now() / 1000,
+      message,
+      session_id: sessionId,
       messages: (chatRequest.messages || []).map(({ role, content }) => ({
         role,
         content,
@@ -89,7 +97,6 @@ export class ChatService {
       },
       body: JSON.stringify(payload),
     });
-    console.log(response);
 
     if (!response.ok) {
       return this.handleError(response);

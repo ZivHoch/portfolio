@@ -1,12 +1,36 @@
-import { motion } from 'framer-motion'
-import { Terminal } from 'lucide-react'
-import { ChatBox } from './ChatBox'
-import { IntroSection } from './IntroSection'
-import { getPersonalInfo } from '../../../config/configLoader'
+import { motion } from "framer-motion";
+import { Terminal } from "lucide-react";
+import { ChatBox } from "./ChatBox";
+import { IntroSection } from "./IntroSection";
+import { useConfig } from "../../../config/ConfigProvider";
 
 export const HomeSection = () => {
-  const personalInfo = getPersonalInfo();
-  
+  const { config, loading, error } = useConfig();
+
+  // Avoid rendering children that synchronously read config until config is ready.
+  if (loading) {
+    return (
+      <div className="min-h-[calc(100vh-6rem)] flex flex-col items-center justify-center text-center px-4">
+        <div className="text-gray-300">Loading…</div>
+      </div>
+    );
+  }
+
+  if (error || !config) {
+    return (
+      <div className="min-h-[calc(100vh-6rem)] flex flex-col items-center justify-center text-center px-4">
+        <div className="text-red-300 font-semibold">
+          Failed to load site configuration.
+        </div>
+        <div className="text-red-200/80 mt-2 text-sm">
+          {error || "Unknown error"}
+        </div>
+      </div>
+    );
+  }
+
+  const personalInfo = config.personal ?? { name: "", profileImageAlt: "" };
+
   return (
     <motion.div
       key="home"
@@ -15,21 +39,21 @@ export const HomeSection = () => {
       transition={{ duration: 0.4 }}
       className="min-h-[calc(100vh-6rem)] flex flex-col items-center justify-center text-center"
     >
-      <motion.div 
+      <motion.div
         className="mb-4 relative"
         initial={{ scale: 0.9, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
         transition={{ type: "spring", bounce: 0.5 }}
       >
         <div className="w-40 h-40 md:w-48 md:h-48 rounded-full overflow-hidden border-4 border-purple-500 relative">
-          <img 
-            src="/profile.jpg" 
-            alt={personalInfo.name}
+          <img
+            src="/profile.jpg"
+            alt={personalInfo.profileImageAlt || personalInfo.name || "Profile"}
             className="w-full h-full object-cover"
           />
           <div className="absolute inset-0 bg-gradient-to-br from-purple-500/20 to-transparent" />
         </div>
-        <motion.div 
+        <motion.div
           className="absolute -bottom-2 -right-2 w-10 h-10 md:w-12 md:h-12 bg-purple-500 rounded-full flex items-center justify-center"
           animate={{ rotate: 360 }}
           transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
@@ -46,11 +70,10 @@ export const HomeSection = () => {
       >
         {personalInfo.name}
       </motion.h1>
-      
+
+      {/* These components currently read config synchronously; safe to render now that config is loaded */}
       <IntroSection />
-
       <ChatBox />
-
     </motion.div>
-  )
-} 
+  );
+};

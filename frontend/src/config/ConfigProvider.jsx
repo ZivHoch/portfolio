@@ -1,5 +1,5 @@
-import { createContext, useContext, useEffect, useState } from 'react';
-import { loadConfig } from './configLoader';
+import { createContext, useContext, useEffect, useState } from "react";
+import { loadConfig } from "./configLoader";
 
 // Create a context for the configuration
 const ConfigContext = createContext(null);
@@ -14,18 +14,29 @@ export const ConfigProvider = ({ children }) => {
   const [error, setError] = useState(null);
 
   useEffect(() => {
+    let cancelled = false;
+
     const fetchConfig = async () => {
       try {
         const configData = await loadConfig();
+        if (cancelled) return;
         setConfig(configData);
-        setLoading(false);
+        setError(null);
       } catch (err) {
-        setError(err.message || 'Failed to load configuration');
+        if (cancelled) return;
+        setConfig(null);
+        setError(err?.message || "Failed to load configuration");
+      } finally {
+        if (cancelled) return;
         setLoading(false);
       }
     };
 
     fetchConfig();
+
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   // If there's an error loading the configuration, display an error message
@@ -33,10 +44,13 @@ export const ConfigProvider = ({ children }) => {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-900 text-white p-4">
         <div className="max-w-md w-full bg-gray-800 p-6 rounded-lg shadow-lg border border-red-500">
-          <h1 className="text-2xl font-bold text-red-500 mb-4">Configuration Error</h1>
+          <h1 className="text-2xl font-bold text-red-500 mb-4">
+            Configuration Error
+          </h1>
           <p className="mb-4">{error}</p>
           <p className="text-gray-400 text-sm">
-            Please ensure that a valid config.json file exists in the public directory of the frontend application.
+            Please ensure that a valid config.json file exists in the public
+            directory of the frontend application.
           </p>
         </div>
       </div>
@@ -67,7 +81,7 @@ export const ConfigProvider = ({ children }) => {
 export const useConfig = () => {
   const context = useContext(ConfigContext);
   if (context === null) {
-    throw new Error('useConfig must be used within a ConfigProvider');
+    throw new Error("useConfig must be used within a ConfigProvider");
   }
   return context;
-}; 
+};

@@ -1,33 +1,33 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect } from "react";
 
 export const useTypingEffect = (content, speed = 30) => {
-  const [displayedContent, setDisplayedContent] = useState('')
-  const [isTyping, setIsTyping] = useState(true)
+  const [displayedContent, setDisplayedContent] = useState("");
+  const [isTyping, setIsTyping] = useState(true);
 
   useEffect(() => {
     if (!content) {
-      setDisplayedContent('')
-      setIsTyping(true)
-      return
+      setDisplayedContent("");
+      setIsTyping(true);
+      return;
     }
 
-    if (!isTyping) return
+    if (!isTyping) return;
 
-    let currentIndex = 0
-    const textLength = content.length
+    let currentIndex = 0;
+    const textLength = content.length;
 
     const typingInterval = setInterval(() => {
-      currentIndex++
+      currentIndex++;
       if (currentIndex <= textLength) {
-        setDisplayedContent(content.slice(0, currentIndex))
+        setDisplayedContent(content.slice(0, currentIndex));
       } else {
-        clearInterval(typingInterval)
-        setIsTyping(false)
+        clearInterval(typingInterval);
+        setIsTyping(false);
       }
-    }, speed)
+    }, speed);
 
-    return () => clearInterval(typingInterval)
-  }, [content, isTyping, speed])
+    return () => clearInterval(typingInterval);
+  }, [content, isTyping, speed]);
 
-  return { displayedContent, isTyping, setIsTyping, setDisplayedContent }
-} 
+  return { displayedContent, isTyping, setIsTyping, setDisplayedContent };
+};

@@ -1,55 +1,58 @@
 import os
 from functools import lru_cache
+
+from dotenv import load_dotenv
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 
 from app.logic.chat_service import ChatService
-# from app.logic.document_indexer import DocumentIndexer
-from google.generativeai import GenerativeModel
 
-# --- FastAPI App Factory ---
+
 def create_app() -> FastAPI:
-    """Creates and configures the FastAPI application with middleware"""
+    """Creates and configures the FastAPI application."""
+    load_dotenv()
     app = FastAPI()
 
     # CORS configuration
-    frontend_url = os.getenv("FRONTEND_URL", "http://localhost")
+    frontend_url = os.getenv("FRONTEND_URL", "http://localhost:5173")
     app.add_middleware(
-        allow_origins=["https://zivdev.netlify.app"],
+        CORSMiddleware,
+        allow_origins=[
+            frontend_url,
+            "http://localhost:5173",
+            "http://localhost:3000",
+            "https://zivdev.netlify.app",
+        ],
         allow_credentials=True,
         allow_methods=["*"],
         allow_headers=["*"],
     )
 
+    # Routers (local import to avoid circular imports during module initialization)
+    from app.controllers.chat_router import router as chat_router
+    app.include_router(chat_router)
+
     return app
 
-# --- Google Gemini Client ---
-@lru_cache()
-def gemini_model() -> GenerativeModel:
-    """Returns a cached instance of the Gemini generative model"""
-    from google.generativeai import configure
-    configure(api_key=os.getenv("LLM_ROUTER_API_KEY"))
 
-    return GenerativeModel(model_name="gemini-pro")
+@lru_cache(maxsize=1)
+def genai_client():
+    """Create and cache the Google GenAI client once per process."""
+    from google import genai
 
-# --- Embeddings Stub (Optional if you're not using embedding search yet) ---
-@lru_cache()
-def embeddings():
-    """Stub for embeddings (adjust as needed if you're using vector search)"""
-    return None  # Replace with real embedding setup if needed
+    api_key = os.getenv("GEMINI_API_KEY") or os.getenv("LLM_ROUTER_API_KEY")
+    if api_key:
+        # Explicit key wins (useful locally and on hosts that don't auto-inject env vars)
+        return genai.Client(api_key=api_key)
 
-# --- Chat Service Stub ---
-@lru_cache()
+    # If GEMINI_API_KEY is set in the environment, the SDK will pick it up automatically.
+    return genai.Client()
+
+
+@lru_cache(maxsize=1)
 def chat_service() -> ChatService:
-    """Creates and caches the chat service instance"""
+    """Create and cache the chat service once per process."""
     return ChatService(
-        llm_client=gemini_model(),
-        llm_model="gemini-pro"  # or use os.getenv("LLM_MODEL")
+        llm_client=genai_client(),
+        llm_model=os.getenv("LLM_MODEL", "gemini-pro"),
     )
-
-# --- Optional: Document Indexer Stub ---
-# @lru_cache()
-# def document_indexer() -> DocumentIndexer:
-#     """Creates and caches document indexer instance"""
-#     return DocumentIndexer(
-#         embeddings=embeddings()
-#     )

@@ -1,26 +1,27 @@
-import { motion } from 'framer-motion';
-import { BookOpen, Brain, MessageSquareText } from 'lucide-react';
-import { getContentConfig } from '../../../config/configLoader';
+import { motion } from "framer-motion";
+import { BookOpen, Brain, MessageSquareText } from "lucide-react";
+import { useConfig } from "../../../config/ConfigProvider";
 
 export const IntroSection = () => {
-  const contentConfig = getContentConfig();
-  const content = contentConfig?.intro || {
+  const { config } = useConfig();
+
+  const content = config?.content?.intro || {
     cards: [],
-    paragraphs: []
+    paragraphs: [],
   };
-  
+
   // Map of icon components by name
   const iconMap = {
     Brain,
     BookOpen,
-    MessageSquareText
+    MessageSquareText,
   };
-  
+
   // Gradient classes for cards
   const gradientClasses = [
     "before:from-rose-500/10 before:via-purple-500/15 before:to-purple-500/10",
     "before:from-blue-500/10 before:via-cyan-500/15 before:to-blue-500/10",
-    "before:from-emerald-500/10 before:via-teal-500/15 before:to-emerald-500/10"
+    "before:from-emerald-500/10 before:via-teal-500/15 before:to-emerald-500/10",
   ];
 
   return (
@@ -30,8 +31,9 @@ export const IntroSection = () => {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-8">
           {content.cards.map((card, index) => {
             const Icon = iconMap[card.icon] || Brain;
-            const gradientClass = gradientClasses[index % gradientClasses.length];
-            
+            const gradientClass =
+              gradientClasses[index % gradientClasses.length];
+
             return (
               <motion.div
                 key={index}
@@ -63,11 +65,13 @@ export const IntroSection = () => {
         {/* Content section */}
         <div className="text-center max-w-3xl mx-auto space-y-2 md:space-y-4">
           {content.paragraphs.map((paragraph, index) => (
-            <p 
+            <p
               key={index}
-              className={index === 0 
-                ? "text-base md:text-lg text-gray-300 leading-relaxed"
-                : "text-sm md:text-base text-gray-400"}
+              className={
+                index === 0
+                  ? "text-base md:text-lg text-gray-300 leading-relaxed"
+                  : "text-sm md:text-base text-gray-400"
+              }
             >
               {paragraph}
             </p>
@@ -76,4 +80,4 @@ export const IntroSection = () => {
       </div>
     </div>
   );
-}; 
+};

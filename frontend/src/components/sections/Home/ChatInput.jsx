@@ -1,16 +1,17 @@
-import { motion, AnimatePresence } from 'framer-motion';
-import { Send, Square } from 'lucide-react';
-import { getChatConfig } from '../../../config/configLoader';
+import { motion, AnimatePresence } from "framer-motion";
+import { Send, Square } from "lucide-react";
+import { useConfig } from "../../../config/ConfigProvider";
 
 export const ChatInput = ({ input, setInput, isLoading, onSubmit, onStop }) => {
-  const chatConfig = getChatConfig();
-  const placeholder = chatConfig?.inputPlaceholder || 'Ask me anything...';
-  
+  const { config } = useConfig();
+
+  const placeholder = config?.chat?.inputPlaceholder || "Ask me anything...";
+
   const handleSubmit = (e) => {
     e.preventDefault();
     if (!input.trim() || isLoading) return;
     onSubmit(input.trim());
-    setInput('');
+    setInput("");
   };
 
   return (
@@ -26,7 +27,7 @@ export const ChatInput = ({ input, setInput, isLoading, onSubmit, onStop }) => {
         className="flex-1 min-w-0 bg-transparent text-white rounded-lg px-4 py-2 focus:outline-none placeholder-gray-400 overflow-hidden text-ellipsis whitespace-nowrap"
         disabled={isLoading}
       />
-      
+
       <AnimatePresence mode="wait">
         {isLoading ? (
           <motion.button
@@ -60,4 +61,4 @@ export const ChatInput = ({ input, setInput, isLoading, onSubmit, onStop }) => {
       </AnimatePresence>
     </motion.form>
   );
-}; 
+};

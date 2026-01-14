@@ -1,19 +1,27 @@
-import os
 import json
 from typing import AsyncGenerator, List
-from fastapi import HTTPException
-import httpx
+from functools import lru_cache
+from pathlib import Path
 
 from app.logs.logger import get_logger
-from app.models.data_structures import ChatRequest
+from models import ChatRequest
 
-from google.generativeai.types import GenerateContentResponse
 from google.generativeai import GenerativeModel
 
 logger = get_logger(__name__)
 
+@lru_cache(maxsize=1)
+def load_markdown_context() -> str:
+    """Load backend/docs/about-me.md once per process."""
+    context_path = Path(__file__).resolve().parents[2] / "docs" / "about-me.md"
+    try:
+        if context_path.exists():
+            return context_path.read_text(encoding="utf-8")
+    except Exception as e:
+        logger.warning(f"Failed to load markdown context: {e}")
+    return ""
 
-class ChatService:
+class GeminiService:
     def __init__(self, llm_client: GenerativeModel, llm_model: str):
         self.llm_client = llm_client
         self.llm_model = llm_model
@@ -43,10 +51,12 @@ class ChatService:
 
         except Exception as e:
             logger.error(f"❌ Error in stream_chat: {str(e)}")
-            raise HTTPException(status_code=500, detail="An error occurred while processing your request")
+        
+            yield f"0:{json.dumps("I'm sorry, something went wrong on the server.")}\n"
+            return
 
     def _build_system_prompt(self) -> str:
-        return (
+        base = (
             "You are a professional AI assistant, designed to provide engaging, "
             "personalized interactions based on my experiences and writings. Your responses should:\n"
             "1. Be accurate and rely solely on provided context or prior messages.\n"
@@ -56,30 +66,15 @@ class ChatService:
             "5. Decline to share sensitive or harmful information.\n"
         )
 
+        context = load_markdown_context()
+        if context:
+            base += "\nContext (about Ziv):\n" + context + "\n"
+
+        return base
+
     def _build_messages(self, system_prompt: str, chat_request: ChatRequest) -> List[dict]:
         messages = [{"role": "system", "content": system_prompt}]
         recent_messages = chat_request.messages[-self.max_context_messages:] if chat_request.messages else []
         messages.extend({"role": msg.role, "content": msg.content} for msg in recent_messages)
         messages.append({"role": "user", "content": chat_request.message})
         return messages
-
-async def stream_from_gemini(user_message: str):
-    headers = {"Content-Type": "application/json"}
-    url = f"{os.getenv('LLM_ROUTER_URL')}?key={os.getenv('LLM_ROUTER_API_KEY')}"
-
-    payload = {
-        "contents": [{
-            "parts": [{"text": user_message}]
-        }]
-    }
-
-    async with httpx.AsyncClient() as client:
-        response = await client.post(url, headers=headers, json=payload)
-
-        if response.status_code != 200:
-            yield f'0:{json.dumps("Gemini error: " + response.text)}\n'
-            return
-
-        result = response.json()
-        text = result.get("candidates", [{}])[0].get("content", {}).get("parts", [{}])[0].get("text", "")
-        yield f'0:{json.dumps(text)}\n'

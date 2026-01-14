@@ -1,67 +1,53 @@
-// Cache for the loaded configuration
 let configCache = null;
-// Flag to track if we've started loading the config
-let isLoading = false;
-// Promise that resolves when the config is loaded
 let configLoadingPromise = null;
 
-/**
- * Load the configuration from the config.json file
- * @returns {Promise<Object>} The configuration object
- * @throws {Error} If the config.json file is not found or cannot be loaded
- */
 export const loadConfig = async () => {
-  if (configCache) {
-    return configCache;
-  }
+  if (configCache) return configCache;
+  if (configLoadingPromise) return configLoadingPromise;
 
-  if (isLoading && configLoadingPromise) {
-    return configLoadingPromise;
-  }
-
-  isLoading = true;
-  configLoadingPromise = new Promise(async (resolve, reject) => {
+  configLoadingPromise = (async () => {
     try {
-      const response = await fetch('/config.json');    
-      const config = await response.json();
+      const mod = await import("../../knowledge/config.json");
+      const config = mod?.default ?? mod;
+
+      if (!config || typeof config !== "object") {
+        throw new Error("Invalid config.json: expected a JSON object");
+      }
+
       configCache = config;
-      resolve(config);
+      return config;
     } catch (error) {
-      reject(new Error('Failed to load configuration. The application requires a valid config.json file in the public directory.'));
-    } finally {
-      isLoading = false;
+      // Allow retries on subsequent calls
+      configLoadingPromise = null;
+
+      const message =
+        error?.message ||
+        "Failed to load configuration. Ensure `frontend/knowledge/config.json` exists and is valid JSON.";
+
+      throw new Error(message);
     }
-  });
+  })();
 
   return configLoadingPromise;
 };
 
-// Start loading the config immediately when this module is imported
-loadConfig()
+loadConfig().catch((err) => {
+  console.error("⚠️ configLoader: ", err?.message || err);
+});
 
-/**
- * Get a configuration value
- * @param {string} section - The section of the configuration (e.g., 'personal', 'social')
- * @param {string} key - The specific key within the section
- * @param {*} defaultValue - Default value if the key is not found
- * @returns {*} The configuration value or default if not found
- * @throws {Error} If the configuration is not loaded
- */
 export const getConfig = (section, key, defaultValue) => {
-  // If config is not loaded yet, throw an error
   if (!configCache) {
-    throw new Error('Configuration not loaded. The application requires a valid config.json file in the public directory.');
+    throw new Error(
+      "Configuration not loaded. Call `await loadConfig()` during startup (and ensure `frontend/knowledge/config.json` exists)."
+    );
   }
 
   if (!section) return configCache;
-  if (!key) return configCache[section] || defaultValue;
-  return configCache[section]?.[key] || defaultValue;
+  if (!key) return configCache[section] ?? defaultValue;
+  return configCache?.[section]?.[key] ?? defaultValue;
 };
 
-export const getPersonalInfo = () => getConfig('personal');
-
-export const getSocialLinks = () => getConfig('social');
-
-export const getChatConfig = () => getConfig('chat');
-
-export const getContentConfig = () => getConfig('content');
+export const getPersonalInfo = () => getConfig("personal");
+export const getSocialLinks = () => getConfig("social");
+export const getChatConfig = () => getConfig("chat");
+export const getContentConfig = () => getConfig("content");
