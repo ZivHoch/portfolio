@@ -1,0 +1,9 @@
+{
+  "name": "backendv2",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "@google/genai": "^1.0.0",
+    "@vercel/node": "^5.5.20"
+  }
+}
