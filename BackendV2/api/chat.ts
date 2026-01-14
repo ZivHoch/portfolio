@@ -63,7 +63,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   try {
     // Streaming response: yields chunks as generated  [oai_citation:3‡Google APIs](https://googleapis.github.io/js-genai/release_docs/index.html)
     const stream = await ai.models.generateContentStream({
-      model: "gemini-2.5-flash",
+      model: "gemini-2.5-flash-lite",
       contents,
     });
 
