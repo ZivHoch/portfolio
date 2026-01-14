@@ -14,4 +14,4 @@ fastapi
 uvicorn
 httpx
 python-dotenv
-google-generativeai
+google-genai
