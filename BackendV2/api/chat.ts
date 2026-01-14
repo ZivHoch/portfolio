@@ -1,11 +1,11 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
 import { GoogleGenAI } from "@google/genai";
-import { readContext } from "../lib/readContext";
+import { readContext } from "../lib/readContext.js";
 import {
   buildSystemPrompt,
   buildGeminiContents,
   type ChatMessage,
-} from "../lib/prompt";
+} from "../lib/prompt.js";
 
 // Vercel Node.js Function: (req, res)
 export default async function handler(req: VercelRequest, res: VercelResponse) {
