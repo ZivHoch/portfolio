@@ -54,5 +54,5 @@ def chat_service() -> ChatService:
     """Create and cache the chat service once per process."""
     return ChatService(
         llm_client=genai_client(),
-        llm_model=os.getenv("LLM_MODEL", "gemini-pro"),
+        llm_model=os.getenv("LLM_MODEL", "gemini-2.5-flash-lite"),
     )
