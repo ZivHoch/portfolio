@@ -5,6 +5,5 @@
   "dependencies": {
     "@google/genai": "^1.0.0",
     "@vercel/node": "^5.5.20"
-  },
-  "moduleResolution": "bundler"
+  }
 }
