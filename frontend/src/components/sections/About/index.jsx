@@ -12,7 +12,7 @@ export const AboutSection = () => {
   useEffect(() => {
     const fetchAboutMe = async () => {
       try {
-        const response = await fetch("/knowledge/about-me.md");
+        const response = await fetch("../../../knowledge/about-me.md");
         const text = await response.text();
         setAboutContent(text);
       } catch (error) {
