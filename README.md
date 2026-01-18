@@ -24,7 +24,7 @@ Instead of browsing static sections, users can ask questions and receive real-ti
 
 ```mermaid
 graph LR
-    A[React + Vite Frontend (Netlify)] --> B[Serverless API (Vercel)]
+    A[React + Vite Frontend - Netlify] --> B[Serverless API - Vercel]
     B --> C[LLM Service]
 ```
 
