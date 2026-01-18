@@ -1,5 +1,9 @@
 import { readFile } from "node:fs/promises";
 import * as path from "node:path";
+import { fileURLToPath } from "node:url";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 let cachedContext: string | null = null;
 
@@ -11,7 +15,7 @@ export async function readContext(): Promise<string> {
   if (cachedContext) return cachedContext;
 
   try {
-    const contextPath = path.join(process.cwd(), "knowledge", "about-me.md");
+    const contextPath = path.join(__dirname, "..", "knowledge", "about-me.md");
     cachedContext = await readFile(contextPath, "utf8");
   } catch {
     cachedContext = ""; // Fail gracefully if file is missing
