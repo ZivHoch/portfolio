@@ -12,14 +12,43 @@ export const AboutSection = () => {
   useEffect(() => {
     const fetchAboutMe = async () => {
       try {
-        const response = await fetch("/knowledge/about-me.md");
+        // Use Vite base URL so this works on Netlify (and any sub-path deploy)
+        const base = import.meta.env.BASE_URL || "/";
+        const url = `${base.replace(/\/$/, "")}/knowledge/about-me.md`;
+
+        const response = await fetch(url, { cache: "no-store" });
+
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status} when fetching ${url}`);
+        }
+
+        const contentType = response.headers.get("content-type") || "";
         const text = await response.text();
+
+        // Netlify SPA fallback often returns index.html (text/html) for missing assets
+        const looksLikeHtml =
+          contentType.includes("text/html") ||
+          text.trimStart().startsWith("<!DOCTYPE html") ||
+          text.trimStart().startsWith("<html");
+
+        if (looksLikeHtml) {
+          console.error(
+            "Fetched HTML instead of markdown. This usually means the file is missing from the deploy output or a SPA redirect is catching the request.",
+            { url, contentType }
+          );
+          setAboutContent(
+            "Error: about-me.md was not found in the deployed site (received HTML instead)."
+          );
+          return;
+        }
+
         setAboutContent(text);
       } catch (error) {
         console.error("Error reading about-me.md:", error);
         setAboutContent("Error loading content...");
       }
     };
+
     fetchAboutMe();
   }, []);
 
