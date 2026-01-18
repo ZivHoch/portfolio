@@ -36,7 +36,26 @@ async function fetchJson<T>(url: string, signal: AbortSignal): Promise<T> {
     method: "GET",
     headers,
     signal,
+    // Prevent 304 Not Modified responses with empty bodies in production.
+    // This avoids res.json() throwing "Unexpected end of JSON input".
+    cache: "no-store",
   });
+
+  if (res.status === 304) {
+    // No body is returned for 304; force a fresh fetch.
+    const fresh = await fetch(url, {
+      method: "GET",
+      headers,
+      signal,
+      cache: "reload",
+    });
+
+    if (!fresh.ok) {
+      throw new Error(`GitHub API error: ${fresh.status} ${fresh.statusText}`);
+    }
+
+    return (await fresh.json()) as T;
+  }
 
   if (!res.ok) {
     throw new Error(`GitHub API error: ${res.status} ${res.statusText}`);
