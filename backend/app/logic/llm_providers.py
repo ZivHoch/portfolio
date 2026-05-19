@@ -6,7 +6,7 @@ from typing import AsyncGenerator, List
 import httpx
 
 OLLAMA_BASE_URL = os.getenv("OLLAMA_BASE_URL", "http://localhost:11434")
-OLLAMA_CHAT_MODEL = os.getenv("OLLAMA_CHAT_MODEL", "llama3.2:3b")
+OLLAMA_CHAT_MODEL = os.getenv("OLLAMA_CHAT_MODEL", "llama3.1:8b")
 OPENAI_COMPAT_BASE_URL = os.getenv("OPENAI_COMPAT_BASE_URL", "http://localhost:11434/v1")
 OPENAI_COMPAT_API_KEY = os.getenv("OPENAI_COMPAT_API_KEY", "ollama")
 OPENAI_COMPAT_MODEL = os.getenv("OPENAI_COMPAT_MODEL", OLLAMA_CHAT_MODEL)
@@ -95,8 +95,58 @@ class OpenAICompatibleProvider(LLMProvider):
                         yield content
 
 
+def _gemini_provider():
+    from app.logic.gemini_provider import GeminiProvider
+
+    return GeminiProvider()
+
+
+def _build_fallback_chain(primary: LLMProvider) -> LLMProvider:
+    from app.logic.fallback_provider import FallbackLLMProvider
+
+    fallbacks: list[LLMProvider] = [primary]
+    use_ollama_fallback = os.getenv("LLM_FALLBACK_OLLAMA", "true").lower() == "true"
+    has_gemini_key = bool(os.getenv("GEMINI_API_KEY") or os.getenv("LLM_ROUTER_API_KEY"))
+
+    if use_ollama_fallback and not isinstance(primary, OllamaProvider):
+        fallbacks.append(OllamaProvider())
+
+    from app.logic.gemini_provider import GeminiProvider
+
+    if has_gemini_key and not isinstance(primary, GeminiProvider):
+        try:
+            fallbacks.append(_gemini_provider())
+        except ValueError:
+            pass
+
+    # Deduplicate by class name while preserving order
+    seen: set[str] = set()
+    unique: list[LLMProvider] = []
+    for p in fallbacks:
+        key = type(p).__name__
+        if key not in seen:
+            seen.add(key)
+            unique.append(p)
+
+    if len(unique) == 1:
+        return unique[0]
+    return FallbackLLMProvider(unique)
+
+
 def get_llm_provider() -> LLMProvider:
-    provider = os.getenv("LLM_PROVIDER", "ollama").lower()
+    provider = os.getenv("LLM_PROVIDER", "").lower()
+
+    if provider == "gemini":
+        return _build_fallback_chain(_gemini_provider())
+
     if provider == "openai_compatible":
-        return OpenAICompatibleProvider()
+        return _build_fallback_chain(OpenAICompatibleProvider())
+
+    if provider == "ollama":
+        return _build_fallback_chain(OllamaProvider())
+
+    # Auto: prefer local Ollama, fall back to Gemini when configured
+    if os.getenv("GEMINI_API_KEY") or os.getenv("LLM_ROUTER_API_KEY"):
+        return _build_fallback_chain(OllamaProvider())
+
     return OllamaProvider()

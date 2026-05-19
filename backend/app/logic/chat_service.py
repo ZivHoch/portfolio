@@ -50,7 +50,15 @@ class ChatService:
 
         except Exception as e:
             logger.error(f"Error in stream_chat: {e}")
-            yield f"0:{json.dumps('Sorry — I could not generate a response. Is Ollama running?')}\n"
+            hint = str(e) or "Unknown error"
+            if "503" in hint or "UNAVAILABLE" in hint.upper():
+                hint = (
+                    "All models are busy. Ensure Ollama is running (ollama serve) "
+                    "or try again in a moment."
+                )
+            elif "ollama" in hint.lower() or "connection refused" in hint.lower():
+                hint = "Could not reach Ollama. Run: ollama serve"
+            yield f"0:{json.dumps(f'Sorry — I could not generate a response. ({hint})')}\n"
 
     def _history_as_dicts(self, chat_request: ChatRequest) -> List[dict]:
         recent = (

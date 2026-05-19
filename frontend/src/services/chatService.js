@@ -1,5 +1,14 @@
-const BACKEND_URL =
-  import.meta.env.VITE_BACKEND_URL || "http://localhost:8000";
+function resolveBackendUrl() {
+  let url = (import.meta.env.VITE_BACKEND_URL || "http://localhost:8000").trim();
+  // Normalize: no trailing slash, no accidental /chat suffix
+  url = url.replace(/\/+$/, "");
+  if (url.endsWith("/chat")) {
+    url = url.slice(0, -5);
+  }
+  return url;
+}
+
+const BACKEND_URL = resolveBackendUrl();
 
 export class ChatService {
   static async handleStreamingResponse(response, callbacks) {
