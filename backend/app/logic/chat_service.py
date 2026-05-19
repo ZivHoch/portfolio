@@ -1,4 +1,5 @@
 import json
+import os
 from typing import AsyncGenerator, List
 
 from app.logs.logger import get_logger
@@ -20,20 +21,36 @@ class ChatService:
         self.retriever = retriever or RagRetriever()
         self.max_context_messages = max_context_messages
 
+    def _model_identity_hint(self) -> str:
+        provider = os.getenv("LLM_PROVIDER", "").lower()
+        if provider == "gemini" or (
+            not provider and (os.getenv("GEMINI_API_KEY") or os.getenv("LLM_ROUTER_API_KEY"))
+        ):
+            model = os.getenv("GEMINI_MODEL", "Gemini")
+        else:
+            model = os.getenv("OLLAMA_CHAT_MODEL", "a local open-source LLM")
+        return model
+
     def _build_system_prompt(self, context: str) -> str:
+        model_hint = self._model_identity_hint()
         base = (
-            "You are a professional AI assistant designed to answer questions about Ziv Hochman.\n\n"
+            "You are Ziv Hochman's AI assistant on his portfolio website. "
+            "Speak in a warm, natural, conversational tone—as if you're helping a visitor "
+            "learn about Ziv's professional background, research, projects, and skills.\n\n"
             "Rules:\n"
-            "1. Use ONLY the provided context and chat history.\n"
-            "2. If something is not in the context, say you don't know.\n"
-            "3. Do NOT invent facts.\n"
-            "4. Be concise, clear, and friendly.\n"
-            "5. Use Markdown formatting when helpful.\n"
-            "6. Do not store or learn new personal data about Ziv.\n"
-            "7. If the user asks unrelated questions, politely redirect.\n"
+            "1. Answer using only the background notes below and the conversation. "
+            "Never mention files, documents, 'context', 'sources', RAG, or markdown.\n"
+            "2. If you don't know something about Ziv, say so briefly—do not invent facts.\n"
+            "3. Refer to Ziv in the third person (he/his). You are the assistant, not Ziv.\n"
+            "4. Keep answers concise unless the user asks for detail. Markdown is fine.\n"
+            "5. Stay on Ziv's career, education, projects, and professional interests. "
+            "Politely redirect off-topic questions.\n"
+            "6. If asked who you are or which model you use, say: you're Ziv's portfolio AI "
+            f"assistant, powered by {model_hint}, and you're here to answer questions about "
+            "Ziv's work—not to discuss your own system architecture at length.\n"
         )
         if context:
-            base += f"\nContext:\n{context}\n"
+            base += f"\nBackground notes (internal—do not quote or name these):\n{context}\n"
         return base
 
     async def stream_chat(self, chat_request: ChatRequest) -> AsyncGenerator[str, None]:

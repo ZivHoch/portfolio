@@ -36,6 +36,12 @@
 
    Frontend only: `npm run dev:web` — API only: `npm run dev:api`
 
+7. **Projects cache** (optional, reduces GitHub API usage):
+   ```bash
+   npm run sync:repos   # writes public/data/repos.json — run daily or in CI
+   ```
+   The Projects page loads this file and refreshes from GitHub at most once per day per browser.
+
 ## 🛠 Development Scripts
 
 ```bash

@@ -61,7 +61,9 @@ class RagRetriever:
             return chunks
 
         q = query.lower()
-        for path in sorted(KNOWLEDGE_DIR.glob("*.md")):
+        chat_dir = KNOWLEDGE_DIR / "chat"
+        search_root = chat_dir if chat_dir.is_dir() else KNOWLEDGE_DIR
+        for path in sorted(search_root.glob("*.md")):
             text = path.read_text(encoding="utf-8")
             if not q or any(word in text.lower() for word in q.split() if len(word) > 2):
                 chunks.append(
@@ -77,8 +79,5 @@ class RagRetriever:
     def format_context(self, chunks: List[dict]) -> str:
         if not chunks:
             return ""
-        parts = []
-        for c in chunks:
-            src = c.get("source_file", "unknown")
-            parts.append(f"[Source: {src}]\n{c['content']}")
-        return "\n\n---\n\n".join(parts)
+        # Plain content only — never label sources; the model must not cite filenames.
+        return "\n\n---\n\n".join(c["content"] for c in chunks)

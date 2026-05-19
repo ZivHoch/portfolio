@@ -15,7 +15,7 @@ def main() -> None:
     DST.mkdir(parents=True, exist_ok=True)
 
     for path in SRC.rglob("*"):
-        if path.is_file():
+        if path.is_file() and path.name != "config.json":
             rel = path.relative_to(SRC)
             target = DST / rel
             target.parent.mkdir(parents=True, exist_ok=True)

@@ -42,6 +42,6 @@
   },
   "chat": {
     "inputPlaceholder": "Ask me anything about Ziv...",
-    "initialMessage": "Hey there! 👋 I'm Ziv's AI assistant, I have access to his writings, and life insights. Feel free to ask and explore about his professional path or personal growth!"
+    "initialMessage": "Hey there! 👋 I'm Ziv's AI assistant. Ask me about his research, experience, projects, or skills—I'll do my best to help."
   }
 }

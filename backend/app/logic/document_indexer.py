@@ -54,7 +54,10 @@ class DocumentIndexer:
         return records
 
     def walk_knowledge_dir(self, knowledge_dir: Path) -> List[dict]:
+        """Index chat/*.md only (excludes brief about-me.md used for the About page)."""
         all_records: List[dict] = []
-        for path in sorted(knowledge_dir.glob("*.md")):
+        chat_dir = knowledge_dir / "chat"
+        search_root = chat_dir if chat_dir.is_dir() else knowledge_dir
+        for path in sorted(search_root.glob("*.md")):
             all_records.extend(self.process_file(path))
         return all_records
