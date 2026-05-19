@@ -1,0 +1,10 @@
+{
+  "name": "my-portfolio",
+  "private": true,
+  "scripts": {
+    "dev": "npm run dev --prefix frontend",
+    "dev:web": "npm run dev:web --prefix frontend",
+    "dev:api": "npm run dev:api --prefix frontend",
+    "build": "npm run build --prefix frontend"
+  }
+}

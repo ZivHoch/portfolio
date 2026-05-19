@@ -1,0 +1,47 @@
+{
+  "personal": {
+    "name": "Ziv Hochman",
+    "email": "ziv.h252@gmail.com",
+    "profileImageAlt": "Ziv Hochman"
+  },
+  "social": {
+    "github": {
+      "url": "https://github.com/ZivHoch"
+    },
+    "linkedin": {
+      "url": "https://www.linkedin.com/in/ziv-hochman/"
+    },
+    "email": {
+      "url": "mailto:ziv.h252@gmail.com"
+    }
+  },
+  "content": {
+    "intro": {
+      "cards": [
+        {
+          "title": "Human-Centered AI",
+          "description": "My work on interpretable, interactive, and responsible AI systems",
+          "icon": "Brain"
+        },
+        {
+          "title": "Research & Learning",
+          "description": "Insights from my academic work, projects, and continuous learning",
+          "icon": "BookOpen"
+        },
+        {
+          "title": "Ask My AI",
+          "description": "Chat with an AI trained on my real experience and projects",
+          "icon": "MessageSquareText"
+        }
+      ],
+      "paragraphs": [
+        "For years, I've been documenting my journey. This space is where I share the intersection of my professional expertise and personal growth.",
+        "Using my authentic writings and reflections, you can explore my documented insights and experiences. While AI isn't perfect, I hope it will share my story as genuinely as possible."
+      ]
+    }
+  },
+  "chat": {
+    "inputPlaceholder": "Ask me anything about Ziv...",
+    "initialMessage": "Hey there! 👋 I'm Ziv's AI assistant, I have access to his writings, and life insights. Feel free to ask and explore about his professional path or personal growth!"
+  }
+}

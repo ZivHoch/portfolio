@@ -1,80 +1,61 @@
-from pathlib import Path
 import json
 from typing import AsyncGenerator, List
-from functools import lru_cache
 
 from app.logs.logger import get_logger
+from app.logic.llm_providers import LLMProvider, get_llm_provider
+from app.logic.rag_retriever import RagRetriever
 from models import ChatRequest
-
-from google import genai
 
 logger = get_logger(__name__)
 
 
-@lru_cache(maxsize=1)
-def load_markdown_context() -> str:
-    """Load backend/docs/about-me.md once per process to avoid disk I/O on every request."""
-    context_path = Path(__file__).resolve().parents[2] / "docs" / "about-me.md"
-    try:
-        if context_path.exists():
-            return context_path.read_text(encoding="utf-8")
-    except Exception as e:
-        logger.warning(f"Failed to load markdown context: {e}")
-    return ""
-
-
 class ChatService:
-    def __init__(self, llm_client: genai.Client, llm_model: str):
-        self.llm_client = llm_client
-        self.llm_model = llm_model
-        self.max_context_messages = 10
+    def __init__(
+        self,
+        llm: LLMProvider | None = None,
+        retriever: RagRetriever | None = None,
+        max_context_messages: int = 10,
+    ):
+        self.llm = llm or get_llm_provider()
+        self.retriever = retriever or RagRetriever()
+        self.max_context_messages = max_context_messages
 
-    def _build_system_prompt(self) -> str:
+    def _build_system_prompt(self, context: str) -> str:
         base = (
-            "You are a professional AI assistant, designed to provide engaging, "
-            "personalized interactions based on my experiences and writings. Your responses should:\n"
-            "1. Be accurate and rely solely on provided context or prior messages.\n"
-            "2. Be concise, direct, and use markdown formatting when appropriate.\n"
-            "3. Show personality while remaining professional.\n"
-            "4. Clearly indicate when you are uncertain rather than guessing.\n"
-            "5. Decline to share sensitive or harmful information.\n"
+            "You are a professional AI assistant designed to answer questions about Ziv Hochman.\n\n"
+            "Rules:\n"
+            "1. Use ONLY the provided context and chat history.\n"
+            "2. If something is not in the context, say you don't know.\n"
+            "3. Do NOT invent facts.\n"
+            "4. Be concise, clear, and friendly.\n"
+            "5. Use Markdown formatting when helpful.\n"
+            "6. Do not store or learn new personal data about Ziv.\n"
+            "7. If the user asks unrelated questions, politely redirect.\n"
         )
-
-        context = load_markdown_context()
         if context:
-            base += "\nContext (about Ziv):\n" + context + "\n"
-
+            base += f"\nContext:\n{context}\n"
         return base
 
     async def stream_chat(self, chat_request: ChatRequest) -> AsyncGenerator[str, None]:
         try:
-            system_prompt = self._build_system_prompt()
-            messages = self._build_messages(system_prompt, chat_request)
+            chunks = self.retriever.retrieve(chat_request.message)
+            context = self.retriever.format_context(chunks)
+            system_prompt = self._build_system_prompt(context)
 
-            # Gemini input format: list of message parts
-            full_input = "\n".join([f"{msg['role'].capitalize()}: {msg['content']}" for msg in messages])
-
-            # New google-genai SDK: stream with client.models.generate_content_stream(...)
-            response_stream = self.llm_client.models.generate_content_stream(
-                model=self.llm_model,
-                contents=full_input,
-            )
-
-            for chunk in response_stream:
-                part = getattr(chunk, "text", None)
-                if part:
-                    yield f"0:{json.dumps(part)}\n"
+            history = self._history_as_dicts(chat_request)
+            async for part in self.llm.stream_chat(
+                system_prompt, history, chat_request.message
+            ):
+                yield f"0:{json.dumps(part)}\n"
 
         except Exception as e:
-            logger.error(f"Error in stream_chat: {str(e)}")
-            # In streaming responses, raising an exception after yielding causes
-            # "response already started". Emit a final chunk and end the stream.
-            yield f"0:{json.dumps('Error: An error occurred while processing your request')}\n"
-            return
+            logger.error(f"Error in stream_chat: {e}")
+            yield f"0:{json.dumps('Sorry — I could not generate a response. Is Ollama running?')}\n"
 
-    def _build_messages(self, system_prompt: str, chat_request: ChatRequest) -> List[dict]:
-        messages = [{"role": "system", "content": system_prompt}]
-        recent_messages = chat_request.messages[-self.max_context_messages:] if chat_request.messages else []
-        messages.extend({"role": msg.role, "content": msg.content} for msg in recent_messages)
-        messages.append({"role": "user", "content": chat_request.message})
-        return messages
+    def _history_as_dicts(self, chat_request: ChatRequest) -> List[dict]:
+        recent = (
+            chat_request.messages[-self.max_context_messages :]
+            if chat_request.messages
+            else []
+        )
+        return [{"role": m.role, "content": m.content} for m in recent]

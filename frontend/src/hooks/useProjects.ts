@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { derivePrimaryLanguage } from "../utils/formatRelativeDate";
 
 export interface Repo {
   id: number;
@@ -6,7 +7,13 @@ export interface Repo {
   url: string;
   description: string | null;
   languages: Record<string, number>;
+  primaryLanguage: string | null;
   updated_at: string;
+  pushed_at: string;
+  stargazers_count: number;
+  forks_count: number;
+  topics: string[];
+  homepage: string | null;
 }
 
 type GithubRepo = {
@@ -15,6 +22,11 @@ type GithubRepo = {
   html_url: string;
   description: string | null;
   updated_at: string;
+  pushed_at: string;
+  stargazers_count: number;
+  forks_count: number;
+  topics?: string[];
+  homepage: string | null;
   fork: boolean;
   archived: boolean;
   languages_url: string;
@@ -36,13 +48,10 @@ async function fetchJson<T>(url: string, signal: AbortSignal): Promise<T> {
     method: "GET",
     headers,
     signal,
-    // Prevent 304 Not Modified responses with empty bodies in production.
-    // This avoids res.json() throwing "Unexpected end of JSON input".
     cache: "no-store",
   });
 
   if (res.status === 304) {
-    // No body is returned for 304; force a fresh fetch.
     const fresh = await fetch(url, {
       method: "GET",
       headers,
@@ -82,6 +91,23 @@ async function runWithConcurrency<T>(
   return results;
 }
 
+function mapGithubRepo(r: GithubRepo): Repo {
+  return {
+    id: r.id,
+    name: r.name,
+    url: r.html_url,
+    description: r.description,
+    languages: {},
+    primaryLanguage: null,
+    updated_at: r.updated_at,
+    pushed_at: r.pushed_at,
+    stargazers_count: r.stargazers_count ?? 0,
+    forks_count: r.forks_count ?? 0,
+    topics: r.topics ?? [],
+    homepage: r.homepage || null,
+  };
+}
+
 export function useProjects(limit = 15) {
   const [repos, setRepos] = useState<Repo[]>([]);
   const [loading, setLoading] = useState(true);
@@ -107,33 +133,30 @@ export function useProjects(limit = 15) {
 
         const ghRepos = await fetchJson<GithubRepo[]>(listUrl, signal);
 
-        // Filter out forks/archived repos (usually noise on a portfolio)
         const top = ghRepos
           .filter((r) => !r.fork && !r.archived)
           .slice(0, limit);
 
-        const mapped: Repo[] = top.map((r) => ({
-          id: r.id,
-          name: r.name,
-          url: r.html_url,
-          description: r.description,
-          languages: {}, // filled in below
-          updated_at: r.updated_at,
-        }));
-
+        const mapped = top.map(mapGithubRepo);
         setRepos(mapped);
 
-        // Fetch languages in the background (keeps initial page load fast)
         const tasks = top.map((r) => async () => {
           try {
             const langs = await fetchJson<Record<string, number>>(
               r.languages_url,
               signal
             );
-            return { id: r.id, languages: langs };
+            return {
+              id: r.id,
+              languages: langs,
+              primaryLanguage: derivePrimaryLanguage(langs),
+            };
           } catch {
-            // If languages fail (rate limit, etc.), keep an empty object.
-            return { id: r.id, languages: {} as Record<string, number> };
+            return {
+              id: r.id,
+              languages: {} as Record<string, number>,
+              primaryLanguage: null,
+            };
           }
         });
 
@@ -144,7 +167,13 @@ export function useProjects(limit = 15) {
         setRepos((prev) =>
           prev.map((repo) => {
             const upd = updates.find((u) => u.id === repo.id);
-            return upd ? { ...repo, languages: upd.languages } : repo;
+            return upd
+              ? {
+                  ...repo,
+                  languages: upd.languages,
+                  primaryLanguage: upd.primaryLanguage,
+                }
+              : repo;
           })
         );
       } catch (err) {

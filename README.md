@@ -1,80 +1,41 @@
-# Interactive AI Portfolio 🤖
+# Interactive AI Portfolio
 
-[![React](https://img.shields.io/badge/Frontend-React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB)](https://reactjs.org/)
-[![Vite](https://img.shields.io/badge/Bundler-Vite-646CFF?style=for-the-badge&logo=vite&logoColor=FFD62E)](https://vitejs.dev/)
-[![Netlify](https://img.shields.io/badge/Deploy-Netlify-00C7B7?style=for-the-badge&logo=netlify)](https://www.netlify.com/)
-[![Vercel](https://img.shields.io/badge/Backend-Vercel-000000?style=for-the-badge&logo=vercel)](https://vercel.com/)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=for-the-badge)](https://opensource.org/licenses/MIT)
+An AI-powered conversational portfolio where visitors chat with an assistant grounded in your background, experience, and projects. Built with React, FastAPI, RAG over personal knowledge, and **Ollama** for local or self-hosted inference.
 
-An AI-powered conversational portfolio that allows visitors to interact with an intelligent assistant trained on my background, experience, and projects.  
-Instead of browsing static sections, users can ask questions and receive real-time, context-aware answers — making the portfolio a living, interactive experience.
-
----
-
-## ✨ Key Features
-
-- 🤖 **Interactive AI Assistant** — Personalized, context-aware conversations
-- ⚡ **Streaming Responses** — Real-time chat experience
-- 🎨 **Modern UI** — Built with React, Vite, and TailwindCSS
-- ☁️ **Serverless Backend** — Deployed on Vercel
-
----
-
-## 🏗 Architecture
+## Architecture
 
 ```mermaid
 graph LR
-    A[React + Vite Frontend - Netlify] --> B[Serverless API - Vercel]
-    B --> C[LLM Service]
+    FE[React Frontend - Netlify] --> API[FastAPI RAG API - Fly.io]
+    API --> VDB[(PostgreSQL pgvector)]
+    API --> Ollama[Ollama LLM]
+    Index[Index script] --> VDB
+    Knowledge[knowledge/*.md] --> Index
 ```
 
----
+## Tech stack
 
-## 🛠 Tech Stack
+| Layer | Stack |
+|-------|--------|
+| Frontend | React, Vite, TailwindCSS, Framer Motion |
+| Chat API | FastAPI, httpx, pgvector |
+| Inference | Ollama (`llama3.2:3b`, `nomic-embed-text`) |
+| Legacy | `BackendV2/` (Vercel + Gemini) — deprecated |
 
-### Frontend
+## Getting started
 
-- React
-- Vite
-- TailwindCSS
-
-### Backend
-
-- Vercel Serverless Functions
-- Node.js
-
----
-
-## 🚀 Getting Started (Local Development)
-
-### 1. Clone the Repository
+### 1. Clone and env
 
 ```bash
 git clone https://github.com/ZivHoch/myPortfolio.git
 cd myPortfolio
+cp env.example .env
+# Edit .env with your GitHub username and paths
 ```
 
----
+### 2. Frontend + API (one command)
 
-### 2. Environment Variables
-
-#### Frontend (`frontend/.env`)
-
-```env
-VITE_GITHUB_USERNAME=your_github_username
-```
-
-> Note: Vite injects env vars at build time. Restart the dev server after changes.
-
-#### Backend (`backend/.env` or Vercel dashboard)
-
-See `backend/README.md` for backend configuration.
-
----
-
-### 3. Run Locally
-
-#### Frontend
+From the repo root or `frontend/`:
 
 ```bash
 cd frontend
@@ -82,75 +43,83 @@ npm install
 npm run dev
 ```
 
-#### Backend
+This starts **Vite** (http://localhost:5173) and the **FastAPI backend** (http://localhost:8000) together.
+
+Frontend only: `npm run dev:web` — API only: `npm run dev:api`
+
+Set in `frontend/.env`:
+
+```env
+VITE_GITHUB_USERNAME=your_github_username
+VITE_BACKEND_URL=http://localhost:8000
+```
+
+### 3. Ollama
+
+Install [Ollama](https://ollama.com) and pull models:
+
+```bash
+ollama pull llama3.2:3b
+ollama pull nomic-embed-text
+```
+
+### 4. Backend setup (first time)
 
 ```bash
 cd backend
-npm install
-vercel dev
+python3 -m venv venv && source venv/bin/activate
+pip install -r requirements.txt
+
+# Postgres + Redis (optional Redis for now)
+docker compose up -d
+
+# Sync knowledge from frontend/knowledge
+python scripts/sync_knowledge.py
+
+# Index into pgvector (requires Postgres)
+python scripts/index_knowledge.py
 ```
 
----
+Then use `npm run dev` from `frontend/` (starts the API automatically).
 
-### 4. Local URLs
+- Frontend: http://localhost:5173  
+- API docs: http://localhost:8000/docs  
 
-- Frontend: http://localhost:5173
-- Backend: http://localhost:3000
+Without Postgres, chat still works using full-markdown fallback context.
 
----
+### 5. Customize knowledge
 
-## 🌍 Deployment
+Edit markdown in [`frontend/knowledge/`](frontend/knowledge/), then:
+
+```bash
+python backend/scripts/sync_knowledge.py
+python backend/scripts/index_knowledge.py
+```
+
+## Deployment
 
 ### Frontend (Netlify)
 
-| Field             | Value           |
-| ----------------- | --------------- |
-| Base directory    | `frontend`      |
-| Build command     | `npm run build` |
-| Publish directory | `dist`          |
+| Field | Value |
+|-------|--------|
+| Base directory | `frontend` |
+| Build command | `npm run build` |
+| Publish directory | `dist` |
 
-Add environment variables in Netlify dashboard:
+Env: `VITE_GITHUB_USERNAME`, `VITE_BACKEND_URL` (your Fly API URL).
 
-```
-VITE_GITHUB_USERNAME=your_username
-```
+### Backend (Fly.io)
 
----
+See [`backend/README.md`](backend/README.md) and [`backend/fly.toml`](backend/fly.toml). Run Ollama on the same machine or a private network reachable from the API.
 
-### Backend (Vercel)
+Set Fly secrets: `OLLAMA_BASE_URL`, `FRONTEND_URL`, `DATABASE_URL`, Postgres credentials.
 
-Deploy the backend as serverless functions.
+## Contributing
 
-Add required environment variables via the Vercel dashboard.
+Pull requests and issues are welcome.
 
----
+## License
 
-## 🧪 Customization
+MIT — see [LICENSE](LICENSE).
 
-To customize the content the assistant is trained on, edit:
-
-```
-frontend/config.json
-```
-
-Full guide:
-
-```
-frontend/CONFIGURATION.md
-```
-
----
-
-## 🤝 Contributing
-
-Pull requests and issues are welcome!
-
----
-
-## 📝 License
-
-This project is licensed under the MIT License — see the [LICENSE](LICENSE) file for details.
-
----
-
-Made with ❤️ by Ziv Hoch
+Made with care by Ziv Hochman

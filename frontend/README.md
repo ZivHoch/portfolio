@@ -17,7 +17,8 @@
 3. Configure environment:
    ```bash
    # Create .env file with:
-   VITE_BACKEND_URL=http://localhost:8000  # or your backend URL
+   VITE_BACKEND_URL=http://localhost:8000
+   VITE_GITHUB_USERNAME=your_github_username
    ```
 
 4. Add your personal content:
@@ -26,12 +27,14 @@
    - Add `profile.jpg` to public folder
    - Update `config.json` following the [Config Setup Guide](CONFIGURATION.md)
 
-5. Start development server:
+5. Start development (frontend + API):
    ```bash
    npm run dev
    ```
 
-6. Visit http://localhost:5173 to view the app 🎉
+6. Visit http://localhost:5173 (API at http://localhost:8000/docs) 🎉
+
+   Frontend only: `npm run dev:web` — API only: `npm run dev:api`
 
 ## 🛠 Development Scripts
 
